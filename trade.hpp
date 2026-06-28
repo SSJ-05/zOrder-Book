@@ -6,10 +6,16 @@
 
 struct Trade {
     
+    // std::uint64_t   trade_id;
+
     std::uint64_t   buy_id;
     std::uint64_t   sell_id;
 
-    double          price;      // replace
+    double          buy_price;
+    double          sell_price;
+
+    // execution price
+    double          exec_price;      // replace
     std::uint32_t   qty;
 };
 

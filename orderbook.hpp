@@ -8,6 +8,8 @@
 #include <vector>
 #include <limits>
 
+// using Price = std::uint64_t;
+
 class Orderbook {
 
 private:

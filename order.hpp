@@ -3,6 +3,7 @@
 #pragma once
 
 #include <cstdint>
+#include <type_traits>
 
 // buy side, sell side in order book
 enum class Side : std::uint8_t {

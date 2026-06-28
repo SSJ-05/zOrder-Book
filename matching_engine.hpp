@@ -11,4 +11,7 @@ private:
 
 public:
     void submit_order (const Order& order);
+
+    void print_book () const noexcept;
 };
+

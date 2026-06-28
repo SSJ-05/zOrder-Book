@@ -12,8 +12,8 @@ private:
     double          mid_price_;
     std::mt19937    rng_;
 
-    std::uniform_int_distribution <int>  price_dist_;
-    std::uniform_int_distribution <int>  qty_dist_;
+    std::uniform_int_distribution <int>            price_dist_;
+    std::uniform_int_distribution <std::uint32_t>  qty_dist_;
     std::bernoulli_distribution side_dist_;
 
 public:
