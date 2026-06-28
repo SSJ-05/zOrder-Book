@@ -6,11 +6,14 @@ Order OrderGenerator::next() {
     
     Order order {};
 
-    mid_price += ud_(rng_) * 0.01;
-    order.id = ++id_;
+    order.price = mid_price_ + price_dist_(rng_) * 0.01;
+    order.id    = ++id_;
 
-    order.price = mid_price_ + 0.01;
-    order.qty   = mid_qty + 5;
+    order.qty   = qty_dist_(rng_);
+
+    order.side  = side_dist_(rng_) ?
+                  Side::Buy : Side::Sell;
 
     return order;
 }
+

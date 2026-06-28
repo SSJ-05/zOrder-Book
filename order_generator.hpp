@@ -3,24 +3,28 @@
 #pragma once
 
 #include "order.hpp"
+#include <random>
 
 class OrderGenerator {
 
 private:
     std::uint64_t   id_;
     double          mid_price_;
-    std::uint32_t   mid_qty;
-
     std::mt19937    rng_;
-    std::uniform_int_distribution<int> ud_;
+
+    std::uniform_int_distribution <int>  price_dist_;
+    std::uniform_int_distribution <int>  qty_dist_;
+    std::bernoulli_distribution side_dist_;
 
 public:
-    Order() :
-        id_ (1),
+    OrderGenerator() :
+        id_ (0),
         mid_price_ (100.00),
-        mid_qty_ (42),
         rng_ (std::random_device {} ()),
-        ud_ (-2, 2) {}
+        price_dist_ (-2, 2),
+        qty_dist_ (1, 100),
+        side_dist_ (0.5) {}
 
     Order next ();
 };
+
