@@ -6,19 +6,21 @@
 
 // buy side, sell side in order book
 enum class Side : std::uint8_t {
-    BUY,
-    SELL
-}
+    Buy,
+    Sell
+};
 
 
 struct Order {
 
     std::uint64_t  id;
 
-    double         price;
+    double         price;   // replace
     std::uint32_t  qty;
 
     Side           side;
 
     // char pad[];
 };
+
+static_assert (std::is_trivially_copyable_v<Order>);
