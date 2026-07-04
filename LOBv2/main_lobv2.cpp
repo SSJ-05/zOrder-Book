@@ -15,7 +15,7 @@
 #include <cstdio>
 
 
-constexpr std::size_t NUM_TRADES { 1 << 4 };
+constexpr std::size_t NUM_TRADES { 1 << 10 };
 
 
 int main () {

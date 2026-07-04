@@ -85,19 +85,21 @@ void Orderbook::print_book() const noexcept {
     if (bids_.empty())
         std::printf("Best Bid : EMPTY\n");
     else
-        std::printf("Best Bid : %.2f\n", bids_.begin()->first / 100.0);
+        std::printf("Best Bid : %.2f\n", 
+                    to_price (bids_.begin()->first));
 
     if (asks_.empty())
         std::printf("Best Ask : EMPTY\n");
     else
-        std::printf("Best Ask : %.2f\n", asks_.begin()->first / 100.0);
+        std::printf("Best Ask : %.2f\n", 
+                    to_price (asks_.begin()->first));
 
     if (!bids_.empty() && !asks_.empty()) {
 
         auto spread =
-            (asks_.begin()->first - bids_.begin()->first) / 100.0;
+            (asks_.begin()->first - bids_.begin()->first);
 
-        std::printf("Spread   : %.2f\n", spread);
+        std::printf("Spread   : %.2f\n", to_price (spread));
     }
     else {
         std::printf("Spread   : N/A\n");
@@ -111,8 +113,7 @@ void Orderbook::print_book() const noexcept {
 
         std::printf(
             "Price : %.2f    Total Qty : %u\n",
-            price / 100.0,
-            level.total_qty
+            to_price (price), level.total_qty
         );
 
         std::printf(
@@ -143,8 +144,7 @@ void Orderbook::print_book() const noexcept {
 
         std::printf(
             "Price : %.2f    Total Qty : %u\n",
-            price / 100.0,
-            level.total_qty
+            to_price (price), level.total_qty
         );
 
         std::printf(

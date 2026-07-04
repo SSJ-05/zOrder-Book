@@ -20,6 +20,7 @@ void MatchingEngine::submit_order (const Order& order) {
         trade.trade_id = next_trade_id_++;
 
         std::printf ("TRADE:\n" 
+                "Time    : %" PRIu64 "\n"
                 "TradeID : %" PRIu64 "\n"
                 "BuyID   : %" PRIu64 "\n"
                 "SellID  : %" PRIu64 "\n"
@@ -28,11 +29,13 @@ void MatchingEngine::submit_order (const Order& order) {
                 "Buy Px  : %.2f\n"
                 "Sell Px : %.2f\n"
                 "......................\n",
+                trade.timestamp_tsc,
                 trade.trade_id, trade.buy_id,
                 trade.sell_id, trade.qty,
-                trade.exec_price / 100.00,
-                trade.buy_price / 100.00,
-                trade.sell_price / 100.00);
+                to_price (trade.exec_price),
+                to_price (trade.buy_price),
+                to_price (trade.sell_price)
+            );
     }
 }
 
