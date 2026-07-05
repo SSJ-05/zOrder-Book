@@ -8,8 +8,9 @@
 
 // buy side, sell side in order book
 enum class Side : std::uint8_t {
-    Buy,
-    Sell
+    Unknown,
+    Bid,
+    Ask
 };
 
 

@@ -23,7 +23,7 @@ Order OrderGenerator::next() {
     order.qty   = qty_dist_(rng_);
 
     order.side  = side_dist_(rng_) ?
-                  Side::Buy : Side::Sell;
+                  Side::Bid : Side::Ask;
 
     return order;
 }

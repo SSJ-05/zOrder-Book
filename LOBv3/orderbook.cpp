@@ -25,7 +25,7 @@ void Orderbook::erase_if_empty_ask (AskIterator it) {
 
 void Orderbook::add_order (const Order& order) {
 
-    if (order.side == Side::Buy) {
+    if (order.side == Side::Bid) {
         auto [it, _] = 
             bids_.try_emplace (order.price, order.price);
         
@@ -45,7 +45,7 @@ void Orderbook::add_order (const Order& order) {
                 order_it }
         );
     }
-    else {
+    else {      // Side::Ask
         auto [it, _] = 
             asks_.try_emplace (order.price, order.price);
         
@@ -85,7 +85,7 @@ bool Orderbook::cancel_order (OrderID id) {
 
     OrderLocation location = pos->second;
 
-    if (location.side == Side::Buy) {
+    if (location.side == Side::Bid) {
 
         // lookup price level
         auto level = bids_.find (location.price);
@@ -103,7 +103,7 @@ bool Orderbook::cancel_order (OrderID id) {
         // erase hash entry
         order_map_.erase (pos);
     }
-    else {      // Side::Sell
+    else {      // Side::Ask
 
         auto level = asks_.find (location.price);
         
@@ -247,7 +247,7 @@ void Orderbook::print_book() const noexcept {
                 "%-10llu %-10u %-10s\n",
                 static_cast<unsigned long long>(order.id),
                 order.qty,
-                "BUY"
+                "BID"
             );
         }
 
@@ -278,7 +278,7 @@ void Orderbook::print_book() const noexcept {
                 "%-10llu %-10u %-10s\n",
                 static_cast<unsigned long long>(order.id),
                 order.qty,
-                "SELL"
+                "ASK"
             );
         }
 
