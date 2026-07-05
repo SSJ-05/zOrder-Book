@@ -9,13 +9,13 @@
 #include <algorithm>
 
 
-void Orderbook::erase_if_empty (BidIterator it) {
+void Orderbook::erase_if_empty_bid (BidIterator it) {
 
     if (it->second.orders.empty()) 
         bids_.erase (it);
 }
 
-void Orderbook::erase_if_empty (AskIterator it) {
+void Orderbook::erase_if_empty_ask (AskIterator it) {
 
     if (it->second.orders.empty()) 
         asks_.erase (it);
@@ -98,7 +98,7 @@ bool Orderbook::cancel_order (OrderID id) {
         level->second.orders.erase (location.it);
 
         // remove level if empty
-        erase_if_empty (level);
+        erase_if_empty_bid (level);
 
         // erase hash entry
         order_map_.erase (pos);
@@ -111,7 +111,7 @@ bool Orderbook::cancel_order (OrderID id) {
 
         level->second.orders.erase (location.it);
 
-        erase_if_empty (level);
+        erase_if_empty_ask (level);
 
         order_map_.erase (pos);
     }
@@ -189,8 +189,8 @@ bool Orderbook::match_order (Trade& trade) {
     }
 
     // remove empty levels
-    erase_if_empty (best_bid); 
-    erase_if_empty (best_ask); 
+    erase_if_empty_bid (best_bid); 
+    erase_if_empty_ask (best_ask); 
 
     return true;
 }

@@ -42,8 +42,8 @@ private:
     std::unordered_map <OrderID, OrderLocation> order_map_;
 
     // helper funcs
-    void erase_level_if_empty (BidIterator);
-    void erase_level_if_empty (AskIterator);
+    void erase_if_empty_bid (BidIterator);
+    void erase_if_empty_ask (AskIterator);
 
 
 public:

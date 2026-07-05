@@ -20,9 +20,9 @@ constexpr std::size_t NUM_TRADES { 1 << 10 };
 
 int main () {
 
-    std::printf ("\n\n=== Market Open===\n\n");
+    std::printf ("\n\n=== Session Open ===\n\n");
 
-    std::printf ("size of order: %zu\n", sizeof(Order));
+    // std::printf ("size of order: %zu\n", sizeof(Order));
     MatchingEngine engine;
     OrderGenerator gen;
 
@@ -35,7 +35,7 @@ int main () {
     engine.print_book();
 
     std::printf ("\n\n=== zOrder Book Closed ===\n");
-    std::printf ("\n\n=== Market Closed===\n\n");
+    std::printf ("\n\n=== Session Closed ===\n\n");
 
     return EXIT_SUCCESS;
 }
