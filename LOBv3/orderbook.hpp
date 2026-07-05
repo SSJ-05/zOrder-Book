@@ -21,7 +21,7 @@ struct OrderLocation {
 
     Side           side;
     Price          price;
-    OrderIterator  it;
+    OrderIterator  it;      // points to order
 };
 
 

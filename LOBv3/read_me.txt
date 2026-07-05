@@ -20,4 +20,21 @@ order_book/
 └── main.cpp
 
 
-
+workflow of v3:
+              OrderID
+                 │
+                 ▼
+         unordered_map
+                 │
+                 ▼
+       OrderLocation
+        ┌────┴────┐
+        │         │
+     Side      Price
+        │         │
+        └────┬────┘
+             ▼
+      map<Price,Level>
+             │
+             ▼
+      list/deque<Order>

@@ -26,25 +26,27 @@ void Orderbook::erase_if_empty (AskIterator it) {
 void Orderbook::add_order (const Order& order) {
 
     if (order.side == Side::Buy) {
-        auto [it, inserted] = 
+        auto [it, _] = 
             bids_.try_emplace (order.price, order.price);
         
         auto& orders = it->second.orders;
 
         orders.push_back (order);
 
-        auto order_it = std::prev (orders.end());
+        auto order_it = std::prev (orders.end());   // points to order
+
+        it->second.total_qty += order.qty;
 
         order_map_.emplace (
             order.id, 
             OrderLocation {
-            order.side,
-            order.price,
-            order_it }
+                order.side,
+                order.price,
+                order_it }
         );
     }
     else {
-         auto [it, inserted] = 
+        auto [it, _] = 
             asks_.try_emplace (order.price, order.price);
         
         auto& orders = it->second.orders;
@@ -53,14 +55,15 @@ void Orderbook::add_order (const Order& order) {
 
         auto order_it = std::prev (orders.end());
 
+        it->second.total_qty += order.qty;
+
         order_map_.emplace (
             order.id, 
             OrderLocation {
-            order.side,
-            order.price,
-            order_it }
+                order.side,
+                order.price,
+                order_it }
         );
-
     }
 }
 
@@ -73,22 +76,54 @@ void Orderbook::add_order (const Order& order) {
      * erase empty level
      * erase hash entry
      * */
-bool cancel_order (OrderID id) {
- 
+bool Orderbook::cancel_order (OrderID id) {
+
+    // lookup order
     auto pos = order_map_.find (id);
     if (pos == order_map_.end()) 
         return false;
 
     OrderLocation location = pos->second;
 
+    if (location.side == Side::Buy) {
 
+        // lookup price level
+        auto level = bids_.find (location.price);
+        if (level == bids_.end()) return false;
+        
+        // decrement level qty
+        level->second.total_qty -= location.it->qty;
+
+        // erase order from price level
+        level->second.orders.erase (location.it);
+
+        // remove level if empty
+        erase_if_empty (level);
+
+        // erase hash entry
+        order_map_.erase (pos);
+    }
+    else {      // Side::Sell
+
+        auto level = asks_.find (location.price);
+        
+        level->second.total_qty -= location.it->qty;
+
+        level->second.orders.erase (location.it);
+
+        erase_if_empty (level);
+
+        order_map_.erase (pos);
+    }
 
     return true;
 }
 
 
-bool modify_order (OrderID id, 
-                   Price new_price, Qty new_qty) {
+
+bool Orderbook::modify_order (OrderID id, 
+                              Price new_price, 
+                              Qty new_qty) {
 
     auto pos = order_map_.find (id);
     if (pos == order_map_.end()) 
@@ -142,19 +177,20 @@ bool Orderbook::match_order (Trade& trade) {
     trade.exec_price = ask.price;
 
     // remove bid ask for matched orders
+    // first erase from order_map then pop from BidMap
+    // to avoid dangling refs
     if (bid.qty == 0) {
+        order_map_.erase (bid.id);
         best_bid->second.orders.pop_front();
-        order_map_.erase(bid.id);
     }
     if (ask.qty == 0) {
+        order_map_.erase (ask.id);
         best_ask->second.orders.pop_front();
-        order_map_.erase(ask.id);
     }
 
     // remove empty levels
-       if (best_ask->second.orders.empty()) 
-        asks_.erase (best_ask);
-    
+    erase_if_empty (best_bid); 
+    erase_if_empty (best_ask); 
 
     return true;
 }
