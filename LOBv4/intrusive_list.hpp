@@ -4,6 +4,7 @@
 
 #include "order.hpp"
 
+
 class IntrusiveList {
 
 private:
@@ -11,9 +12,10 @@ private:
     Order*  tail_  { nullptr };
 
 public:
-    IntrusiveList() = default;
+    IntrusiveList()  = default;
     ~IntrusiveList() = default;
 
+    // all ops O(1)
     void   push_back (Order*);
 
     void   erase (Order*);
@@ -27,11 +29,11 @@ public:
     Order* back()  const noexcept;
 
 
-    IntrusiveList (const InstrusiveList&) = delete;
-    IntrusiveList& operator=(const InstrusiveList&) = delete;
+    IntrusiveList (const IntrusiveList&) = delete;
+    IntrusiveList& operator=(const IntrusiveList&) = delete;
 
-    IntrusiveList (InstrusiveList&&) = delete;
-    IntrusiveList& operator=(InstrusiveList&&) = delete;
+    IntrusiveList (IntrusiveList&&) = delete;
+    IntrusiveList& operator=(IntrusiveList&&) = delete;
 
 };
 
