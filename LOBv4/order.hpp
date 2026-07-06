@@ -22,10 +22,11 @@ struct Order {
 
     Side     side   { Side::Bid };
 
+    // meta data
     Order*   prev   { nullptr };
     Order*   next   { nullptr };
 
-    // char pad[];
+    bool     inlist { false };  // flag to avoid double entry of same order
 };
 
 static_assert (std::is_trivially_copyable_v<Order>);
