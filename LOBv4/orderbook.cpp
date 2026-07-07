@@ -1,4 +1,4 @@
-// orderbook src file// 04.07.26// ZeroK
+// orderbook src file// 07.07.26// ZeroK
 
 #include "order.hpp"
 #include "trade.hpp"
@@ -24,174 +24,129 @@ void Orderbook::erase_if_empty_ask (AskIterator it) {
 
 
 
-void Orderbook::add_order (const Order& order) {
+void Orderbook::add_order (Order* order) {
 
-    if (order.side == Side::Bid) {
-        auto [it, _] = 
-            bids_.try_emplace (order.price, order.price);
-        
-        auto& orders = it->second.orders;
+    PriceLevel* level;
 
-        orders.push_back (order);
-
-        auto order_ptr = std::prev (orders.end());   // points to order
-
-        it->second.total_qty += order.qty;
-
-        order_map_.emplace (
-            order.id, 
-            OrderLocation {
-                order.side,
-                order.price,
-                order_ptr }
-        );
+    if (order->side == Side::Bid) {
+        level = &bids_.try_emplace (
+                order->price, order->price).first->second;
     }
-    else {      // Side::Ask
-        auto [it, _] = 
-            asks_.try_emplace (order.price, order.price);
-        
-        auto& orders = it->second.orders;
-
-        orders.push_back (order);
-
-        auto order_ptr = std::prev (orders.end());
-
-        it->second.total_qty += order.qty;
-
-        order_map_.emplace (
-            order.id, 
-            OrderLocation {
-                order.side,
-                order.price,
-                order_ptr }
-        );
+    else {
+        level = &asks_.try_emplace (
+                order->price, order->price).first->second;
     }
+        
+    level->orders.push_back( order );
+
+    level->total_qty += order->qty;
+
+    order_map_.emplace (
+            order->id, 
+            OrderLocation { level, order }
+        );
 }
 
 
-/* lookup order
-     * find side
-     * find price level
-     * decrement total_qty
-     * erase iterator
-     * erase empty level
-     * erase hash entry
-     * */
 bool Orderbook::cancel_order (OrderID id) {
 
-    // lookup order
-    auto pos = order_map_.find (id);
-    if (pos == order_map_.end()) 
+    // lookup order in hashmap
+    auto pos = order_map_.find( id );
+    if ( pos == order_map_.end() ) 
         return false;
 
-    OrderLocation location = pos->second;
+    PriceLevel* level = pos->second.level;  // cache level
+    Order* order = pos->second.order;       // cache the ptr
 
-    if (location.side == Side::Bid) {
+    level->total_qty -= order->qty;     // dec qty
+    level->orders.erase( order );       // erase from intrusivelist O(1)
 
-        // lookup price level
-        auto level = bids_.find (location.price);
-        if (level == bids_.end()) return false;
-        
-        // decrement level qty
-        level->second.total_qty -= location.it->qty;
 
-        // erase order from price level
-        level->second.orders.erase (location.it);
+    if ( level->orders.empty() ) {      // erase empty levels (log N)
 
-        // remove level if empty
-        erase_if_empty_bid (level);
-
-        // erase hash entry
-        order_map_.erase (pos);
+        if ( order->side == Side::Bid )
+            bids_.erase( level->price );
+        else
+            asks_.erase( level->price );
     }
-    else {      // Side::Ask
 
-        auto level = asks_.find (location.price);
-        
-        level->second.total_qty -= location.it->qty;
-
-        level->second.orders.erase (location.it);
-
-        erase_if_empty_ask (level);
-
-        order_map_.erase (pos);
-    }
+    order_map_.erase( pos );    // erase hash entry O(1)
 
     return true;
 }
 
 
 
-bool Orderbook::modify_order (OrderID id, 
-                              Price new_price, 
-                              Qty new_qty) {
+bool Orderbook::modify_order ( OrderID id, 
+                               Price new_price, 
+                               Qty new_qty ) {
 
-    auto pos = order_map_.find (id);
-    if (pos == order_map_.end()) 
+    auto pos = order_map_.find( id );
+    if ( pos == order_map_.end() ) 
         return false;
 
-    OrderLocation location = pos->second;
-    Order copy = *location.it;
+    Order* order = pos->second.order;
 
-    cancel_order (id);
+    cancel_order( id );
 
-    copy.price = new_price;
-    copy.qty   = new_qty;
+    order->price = new_price;
+    order->qty   = new_qty;
 
-    add_order (copy);
+    add_order( order );
 
     return true;
 }
 
 
 
-// review algo
-// std::optional<Trade> Orderbook::match_order (Order& incoming) {
-// bool Orderbook::match_order (Order& incoming, Trade& trade) {
-bool Orderbook::match_order (Trade& trade) {
-
-    auto best_bid = bids_.begin();
-    auto best_ask = asks_.begin();
+bool Orderbook::match_order ( Trade& trade ) {
 
     if (bids_.empty()) return false;
     if (asks_.empty()) return false;
 
+    auto best_bid = bids_.begin();
+    auto best_ask = asks_.begin();
+
     if (best_bid->first < best_ask->first) return false;
 
+    // cache levels
+    PriceLevel* bid_level = &best_bid->second;   
+    PriceLevel* ask_level = &best_ask->second;
+
+    Order* bid = bid_level->orders.front();
+    Order* ask = ask_level->orders.front();
+
     // update trade members
-    auto& bid = best_bid->second.orders.front();
-    auto& ask = best_ask->second.orders.front();
+    trade.qty = std::min (bid->qty, ask->qty);
+    bid->qty  -= trade.qty;
+    ask->qty  -= trade.qty;
 
-    trade.qty = std::min (bid.qty, ask.qty);
-    bid.qty  -= trade.qty;
-    ask.qty  -= trade.qty;
+    // update LevelQty and price
+    bid_level->total_qty -= trade.qty;
+    ask_level->total_qty -= trade.qty;
 
-    // update LevelQty
-    best_bid->second.total_qty -= trade.qty;
-    best_ask->second.total_qty -= trade.qty;
+    trade.buy_id  = bid->id;
+    trade.sell_id = ask->id;
 
-    trade.buy_id  = bid.id;
-    trade.sell_id = ask.id;
-
-    trade.buy_price  = bid.price;
-    trade.sell_price = ask.price;
-    trade.exec_price = ask.price;
+    trade.buy_price  = best_bid->first;
+    trade.sell_price = best_ask->first;
+    trade.exec_price = best_ask->first;
 
     // remove bid ask for matched orders
     // first erase from order_map then pop from BidMap
     // to avoid dangling refs
-    if (bid.qty == 0) {
-        order_map_.erase (bid.id);
-        best_bid->second.orders.pop_front();
+    if ( bid->qty == 0 ) {
+        order_map_.erase( bid->id );
+        bid_level->orders.erase( bid );
     }
-    if (ask.qty == 0) {
-        order_map_.erase (ask.id);
-        best_ask->second.orders.pop_front();
+    if ( ask->qty == 0 ) {
+        order_map_.erase( ask->id );
+        ask_level->orders.erase( ask );
     }
 
     // remove empty levels
-    erase_if_empty_bid (best_bid); 
-    erase_if_empty_ask (best_ask); 
+    erase_if_empty_bid( best_bid ); 
+    erase_if_empty_ask( best_ask ); 
 
     return true;
 }

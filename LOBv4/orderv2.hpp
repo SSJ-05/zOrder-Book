@@ -23,18 +23,19 @@ struct ListNode {
     ListNode*  next  { nullptr };
 
 #ifndef NDEBUG
-    bool     inlist { false };  // flag to avoid double entry of same order
+    bool  inlist {};  // flag to avoid double entry of same order
 #endif
 
 };
 
 
+// inherit from ListNode
 struct Order : ListNode {
 
     OrderID  id     {};
 
+    Price    price  {};
     Qty      qty    {};
-
     Side     side   { Side::Bid };
 
 };

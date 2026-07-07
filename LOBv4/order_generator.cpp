@@ -1,13 +1,12 @@
-// order generator src file// 27.06.26// ZeroK
+// order generator src file// 07.07.26// ZeroK
 
 #include "order_generator.hpp"
 
 // #include <algorithm>    // for std::clamp
 
-Order OrderGenerator::next() {
-    
-    Order order {};
 
+void OrderGenerator::next( Order* order ) {
+    
     // Price spread_ { 2 };
 
     mid_price_ += price_dist_(rng_);

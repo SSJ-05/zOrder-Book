@@ -23,13 +23,5 @@ struct PriceLevel {
 
     IntrusiveList orders {};
 
-    // Order*    head      { nullptr };
-    // Order*    tail      { nullptr };
-    //
-    // // helper func
-    // bool empty() const noexcept {
-    //     return (head == nullptr && tail == nullptr);
-    // }
-
 };
 

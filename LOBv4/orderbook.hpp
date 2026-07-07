@@ -1,4 +1,4 @@
-// order book header file// 04.07.26// ZeroK
+// order book header file// 07.07.26// ZeroK
 
 #pragma once
 
@@ -6,20 +6,18 @@
 #include "order.hpp"
 #include "trade.hpp"
 #include "price_level.hpp"
-#include "intrusive_list.hpp"
+#include "intrusive_listv2.hpp"
 
 #include <map>
 #include <unordered_map>
-
 
 
 // helps in identifying Price Level to be modified
 // w/o this, scan the whole order_map_
 struct OrderLocation {
 
-    Side    side;
-    Price   price;
-    Order*  order_ptr  { nullptr };     // points to order
+    PriceLevel*  level  { nullptr };
+    Order*       order  { nullptr };
 };
 
 
@@ -45,7 +43,7 @@ private:
 
 
 public:
-    void add_order (const Order&);
+    void add_order (Order*);
 
     bool match_order (Trade&);
 

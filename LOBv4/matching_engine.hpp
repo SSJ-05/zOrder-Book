@@ -12,7 +12,7 @@ private:
     OrderID next_trade_id_ { 1 };
 
 public:
-    void submit_order (const Order& order);
+    void submit_order (Order*);
 
     void print_book () const noexcept;
 };

@@ -11,7 +11,7 @@
 #include <immintrin.h>
 
 
-void MatchingEngine::submit_order (const Order& order) {
+void MatchingEngine::submit_order (Order* order) {
 
     book_.add_order (order);
 

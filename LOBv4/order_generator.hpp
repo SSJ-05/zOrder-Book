@@ -27,6 +27,6 @@ public:
         qty_dist_ (1, 100),
         side_dist_ (0.5) {}
 
-    Order next ();
+    void next (Order*);
 };
 

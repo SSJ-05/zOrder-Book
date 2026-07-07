@@ -22,6 +22,8 @@ public:
 
     void   pop_front();
 
+    void   validate() const;
+
     bool   empty() const noexcept;
 
     Order* front() const noexcept;
