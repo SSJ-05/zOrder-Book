@@ -12,5 +12,5 @@ using OrderID   =  std::uint64_t;
 // convert int to double helper func
 constexpr double to_price (Price p) noexcept {
 
-    return static_cast<double>(p) / 100.00;
+    return static_cast<double>( p ) / 100.00;
 }

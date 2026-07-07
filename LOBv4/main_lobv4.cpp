@@ -5,7 +5,7 @@
  *      -> matching engine -> trade ring + book updates -> publisher
  * */
 
-#include "order.hpp"
+#include "orderv2.hpp"
 #include "trade.hpp"
 #include "orderbook.hpp"
 #include "order_generator.hpp"
@@ -19,7 +19,7 @@
 
 constexpr std::size_t ARENA_CAPACITY  { 1 << 15 };
 constexpr std::size_t ARENA_ORDERS    { 2 * ARENA_CAPACITY };
-constexpr std::size_t NUM_TRADES      { 1 << 10 };
+constexpr std::size_t NUM_TRADES      { 1 << 4 };
 
 static_assert (ARENA_CAPACITY >= 2 * NUM_TRADES);
 
@@ -38,7 +38,7 @@ int main () {
     for (auto _ {NUM_TRADES}; _-- > 0;) {
         
         Order* order = arena.create<Order>();
-        gen.next( *order );
+        gen.next( order );
         engine.submit_order( order );
     }
 

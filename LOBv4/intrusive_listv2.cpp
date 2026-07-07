@@ -7,8 +7,8 @@
  * */
 
 
-#include "intrusive_list.hpp"
-#include "order.hpp"
+#include "intrusive_listv2.hpp"
+#include "orderv2.hpp"
 
 #include <cassert>
 
@@ -45,6 +45,7 @@ void IntrusiveList::push_back (Order* order) {
 
     order->inlist = true;           // set the flag after append
 
+    ++size_;
     // post append check
     assert (head_.next != &tail_);      // list is not empty
     assert (tail_.prev == order);       // order is last
@@ -67,6 +68,8 @@ void IntrusiveList::erase (Order* order) {
     order->prev->next = order->next;
     order->next->prev = order->prev;
 
+    --size_;
+
     // cleanup removed node
     order->prev   = nullptr;  
     order->next   = nullptr;  
@@ -84,6 +87,8 @@ void IntrusiveList::pop_front () {
     assert (!empty());
 
     erase( static_cast<Order*>( head_.next ) );
+
+    --size_;
 }
 
 
@@ -121,3 +126,19 @@ Order* IntrusiveList::back() const noexcept {
     return static_cast<Order*>( tail_.prev );
 }
 
+
+std::size_t IntrusiveList::size() const noexcept {
+
+    return size_;
+}
+
+
+// for traversals
+Order* IntrusiveList::next ( Order* p ) const noexcept {
+
+    if (p == nullptr) return nullptr;
+
+    return (p->next == &tail_) 
+                    ? nullptr 
+                    : static_cast<Order*>( p->next );
+}

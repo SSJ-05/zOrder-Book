@@ -39,3 +39,17 @@ workflow of v4:
              │
              ▼
       list/deque<Order>
+
+OrderGenerator
+      │
+      ▼
+Arena::create<Order>()
+      │
+      ▼
+MatchingEngine::submit(Order*)
+      │
+      ▼
+Orderbook::add_order(Order*)
+      │
+      ▼
+IntrusiveList

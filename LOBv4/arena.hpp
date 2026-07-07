@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <sys/mman.h>   // for mmap, munmap, mlock, munlock
+#include <unistd.h>     // for sysconf
 #include <cerrno>       // for fprintf error context
 #include <cstdio>       // for fprintf
 #include <new>
@@ -17,8 +18,8 @@ class Arena {
 
 private:
     // hot data - accessed on every allocate
-    alignas(64) std::size_t  offset_ { 0uz };
-                std::byte    pad_[64 - sizeof(std::size_t)];
+    alignas(64)        std::size_t  offset_ { 0uz };
+    [[ maybe_unused ]] std::byte    pad_[64 - sizeof(std::size_t)];
     
     // cold data - on separate cache line - avoid false sharing
                 std::size_t  size_;
@@ -90,12 +91,12 @@ public:
     // fault all pages into RAM 
     // call warm_cache() before hot path
     void touch_all_pages() noexcept {
-        // constexpr std::size_t page_size = 2 * 1024 * 1024;   // pre-touch 2MB pages
-        constexpr std::size_t page_size = sysconf(_SC_PAGESIZE);
-                  std::byte*  mem       = memory_;
+
+        const std::size_t page_size = 
+            static_cast<std::size_t>( sysconf(_SC_PAGESIZE) );
 
         for (auto i {0uz}; i < size_; i += page_size) 
-            mem[i] = std::byte {0}; 
+            memory_[i] = std::byte {0}; 
     }
 
     // warm cache before hot path
@@ -107,8 +108,8 @@ public:
 
         // prefetch + read
         for (auto i {0uz}; i < size_; i += CL) {
-            __builtin_prefetch(memory_ + i + PD, 1, 3);   // prefetch next 8 lines
-            sink ^= memory_[i];                           // read current line
+            __builtin_prefetch( memory_ + i + PD, 1, 3 );         // prefetch next 8 lines
+            sink ^= static_cast<std::uint8_t>( memory_[i] );    // read current line
         }
         (void) sink;    // prevent optimization
     }

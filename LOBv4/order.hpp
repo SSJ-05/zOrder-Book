@@ -4,6 +4,7 @@
 
 #include "types.hpp"
 
+#include <cstdint>
 #include <type_traits>
 
 // buy side, sell side in order book
@@ -12,9 +13,8 @@ enum class Side : std::uint8_t {
     Ask
 };
 
-
 // Order is node in intrusive list
-struct Order {
+struct Order : ListNode {
 
     OrderID  id     {};
 

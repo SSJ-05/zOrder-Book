@@ -1,10 +1,10 @@
 // orderbook src file// 07.07.26// ZeroK
 
-#include "order.hpp"
+#include "orderv2.hpp"
 #include "trade.hpp"
 #include "orderbook.hpp"
 #include "price_level.hpp"
-#include "intrusive_list.hpp"
+#include "intrusive_listv2.hpp"
 
 #include <cstdio>
 #include <algorithm>
@@ -186,8 +186,8 @@ void Orderbook::print_book() const noexcept {
     for (const auto& [price, level] : bids_) {
 
         std::printf(
-            "Price : %.2f    Total Qty : %u\n",
-            to_price (price), level.total_qty
+            "Price : %.2f    Total Qty : %u     Orders : %zu\n" ,
+            to_price (price), level.total_qty, level.orders.size()
         );
 
         std::printf(
@@ -197,12 +197,14 @@ void Orderbook::print_book() const noexcept {
             "SIDE"
         );
 
-        for (const auto& order : level.orders) {
+        for ( Order* p = level.orders.front();
+              p; 
+              p = level.orders.next( p ) ) {
 
             std::printf(
                 "%-10llu %-10u %-10s\n",
-                static_cast<unsigned long long>(order.id),
-                order.qty,
+                static_cast<unsigned long long>(p->id),
+                p->qty,
                 "BID"
             );
         }
@@ -217,8 +219,8 @@ void Orderbook::print_book() const noexcept {
     for (const auto& [price, level] : asks_) {
 
         std::printf(
-            "Price : %.2f    Total Qty : %u\n",
-            to_price (price), level.total_qty
+            "Price : %.2f    Total Qty : %u     Orders : %zu\n" ,
+            to_price (price), level.total_qty, level.orders.size()
         );
 
         std::printf(
@@ -228,12 +230,14 @@ void Orderbook::print_book() const noexcept {
             "SIDE"
         );
 
-        for (const auto& order : level.orders) {
+        for ( Order* p = level.orders.front();
+              p; 
+              p = level.orders.next( p ) ) {
 
             std::printf(
                 "%-10llu %-10u %-10s\n",
-                static_cast<unsigned long long>(order.id),
-                order.qty,
+                static_cast<unsigned long long>(p->id),
+                p->qty,
                 "ASK"
             );
         }

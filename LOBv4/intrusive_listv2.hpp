@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "order.hpp"
+#include "orderv2.hpp"
 
 
 class IntrusiveList {
@@ -10,6 +10,8 @@ class IntrusiveList {
 private:
     ListNode  head_  { nullptr, nullptr };
     ListNode  tail_  { nullptr, nullptr };
+
+    std::size_t size_ { 0uz };
 
 public:
     IntrusiveList();
@@ -30,7 +32,12 @@ public:
 
     Order* back()  const noexcept;
 
+    std::size_t size() const noexcept;
 
+    // helper func for iteration
+    Order* next (Order* p) const noexcept;
+
+    // copy and move semantics
     IntrusiveList (const IntrusiveList&) = delete;
     IntrusiveList& operator=(const IntrusiveList&) = delete;
 
