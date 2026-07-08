@@ -1,0 +1,29 @@
+// order generator src file// 07.07.26// ZeroK
+
+#include "orderv2.hpp"
+#include "order_generator.hpp"
+
+// #include <algorithm>    // for std::clamp
+
+
+void OrderGenerator::next( Order* order ) {
+    
+    // Price spread_ { 2 };
+
+    mid_price_ += price_dist_(rng_);
+
+    // // optional clamp for keeping prices centered
+    // mid_price_ = std::clamp (
+    //         mid_price_, Price {9900}, Price {10100} );
+
+    order->price = mid_price_;
+    
+    order->id    = ++id_;
+
+    order->qty   = qty_dist_(rng_);
+
+    order->side  = side_dist_(rng_) ?
+                  Side::Bid : Side::Ask;
+
+}
+

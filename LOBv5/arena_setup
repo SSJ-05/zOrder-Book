@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# hugepage setup script for arena, 07.07.26, ZeroK
+
+set -e
+
+echo "--- HugePage setup for Arena ---"
+
+echo "Allocating hugepages..."
+echo 512 | sudo tee /proc/sys/vm/nr_hugepages
+
+# mount hugetlbfs
+# if mount | grep -qs "/dev/hugepages" /proc/mounts; then
+#     echo "hugetlbs already mounted"
+# else
+#     echo "Mounting hugetlbfs"
+#     sudo mkdir -p /dev/hugepages
+#     sudo mount -t hugetlbfs nodev /dev/hugepages
+#
+#     mountpoint -q /dev/hugepages \
+#         && echo "Mounted successfully." \
+#         || { echo "Mount failed."; exit 1; }
+# fi
+
+# verify
+echo ""
+echo "--- Verification ---"
+echo "$(grep HugePages /proc/meminfo)"
+echo "--- Ready ---"
+
