@@ -19,6 +19,7 @@ private:
 
     Price  best_idx_    {};
     Price  base_price_  {};
+    Side   side_        { Bid };
 
     std::array<PriceLevel, NUM_LEVELS_> rpl_ {};
 
@@ -33,17 +34,17 @@ public:
 
     void remove (Order*) noexcept;
 
-    void clear_level (Price new_price) noexcept;
+    void clear_level (Price) noexcept;
 
-    void update_best() noexcept;
+    void update_best (Price) noexcept;
 
-    std::size_t to_idx (Price p) const noexcept;
+    std::size_t to_idx (Price) const noexcept;
 
-    bool contains (Price p) const noexcept;
+    bool contains (Price) const noexcept;
 
-    PriceLevel& at_level (Price p) noexcept;
+    PriceLevel& at_level (Price) noexcept;
 
-    PriceLevel* best_level ();
+    PriceLevel* best_level();
 
    
     // reserved for future versions
