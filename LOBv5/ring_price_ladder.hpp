@@ -26,8 +26,10 @@ private:
 
 public:
     // ctor
-    explicit RingPriceLadder (Price base) :
-        base_price_ (base) {}
+    explicit RingPriceLadder (Price base, Side side) :
+        base_price_ (base),
+        side_ (side) {}
+
 
     // ops
     void add (Order*) noexcept;
@@ -36,7 +38,8 @@ public:
 
     void clear_level (Price) noexcept;
 
-    void update_best (Price) noexcept;
+    void update_best_after_add (Price) noexcept;
+    void update_best_after_remove() noexcept;
 
     std::size_t to_idx (Price) const noexcept;
 

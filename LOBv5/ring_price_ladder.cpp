@@ -8,10 +8,10 @@
 #include <array>
 #include <cstdint>
 
+
 // helper func to calculate index
 // logical idx  = price - base
 // physical idx = logical & MASK
-
 std::size_t RingPriceLadder::to_idx (Price p) const noexcept {
         
     return static_cast<std::size_t>( p - base_price_ )
@@ -34,6 +34,7 @@ PriceLevel&  RingPriceLadder::at_level (Price p) noexcept {
 }
 
 
+
 void RingPriceLadder::add (Order* order) noexcept {
     
     if ( !contains( order->price ) ) 
@@ -50,9 +51,36 @@ void RingPriceLadder::add (Order* order) noexcept {
 
         level.total_qty += order->qty;
 
-        update_best( order->price );
+        update_best_after_add( order->price );
     }
 }
+
+
+
+void RingPriceLadder::update_best_after_add (Price new_price) noexcept {
+    
+    const std::size_t idx = to_idx( new_price );
+    
+    // first order in orderbook
+    if ( at_level( price ).orders.size() == 1 ) {
+        best_idx_ = idx;
+        return;
+    }
+
+    Price best_price_ = base_price_ 
+                        + static_cast<Price>( best_idx_ );
+
+    if ( side_ == Side::Bid ) {
+        if ( new_price > best_price_ ) 
+            best_idx_ = idx;
+    }
+    else {   // Ask
+        if ( new_price < best_price_ )
+            best_idx_ = idx;
+    }
+}
+
+
 
 
 // void  RingPriceLadder::clear_level (Price new_price) noexcept {
