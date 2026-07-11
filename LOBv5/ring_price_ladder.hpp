@@ -16,6 +16,7 @@ class RingPriceLadder {
 private:
     static constexpr std::size_t NUM_LEVELS_  { 1 << 12 };
     static constexpr std::size_t MASK_        { NUM_LEVELS_ - 1 };
+    static constexpr std::size_t INVALID_     { NUM_LEVELS_ };
 
     Price  best_idx_    {};
     Price  base_price_  {};
@@ -38,8 +39,8 @@ public:
 
     void clear_level (Price) noexcept;
 
-    void update_best_after_add (Price) noexcept;
-    void update_best_after_remove() noexcept;
+    void update_best_after_add    (Price) noexcept;
+    void update_best_after_remove (Price) noexcept;
 
     std::size_t to_idx (Price) const noexcept;
 

@@ -29,8 +29,8 @@ bool RingPriceLadder::contains (Price p) const noexcept {
 // getter funcs for rpl_[index]
 PriceLevel&  RingPriceLadder::at_level (Price p) noexcept {
 
-    if ( contains (p) )
-        return rpl_[to_idx( p )];
+    assert( contains ( p ) );
+    return rpl_[to_idx( p )];
 }
 
 
@@ -39,6 +39,7 @@ void RingPriceLadder::add (Order* order) noexcept {
     
     if ( !contains( order->price ) ) 
         advance_window( order->price );
+
     else {
         PriceLevel& level = at_level( order->price );
         
@@ -62,13 +63,13 @@ void RingPriceLadder::update_best_after_add (Price new_price) noexcept {
     const std::size_t idx = to_idx( new_price );
     
     // first order in orderbook
-    if ( at_level( price ).orders.size() == 1 ) {
+    if ( at_level( new_price ).orders.size() == 1 ) {
         best_idx_ = idx;
         return;
     }
 
-    Price best_price_ = base_price_ 
-                        + static_cast<Price>( best_idx_ );
+    Price best_price = base_price_ 
+                       + static_cast<Price>( best_idx_ );
 
     if ( side_ == Side::Bid ) {
         if ( new_price > best_price_ ) 
@@ -80,6 +81,33 @@ void RingPriceLadder::update_best_after_add (Price new_price) noexcept {
     }
 }
 
+
+
+void RingPriceLadder::update_best_after_remove (Price removed_price) noexcept {
+
+    if ( to_idx( removed_price ) != best_idx_ ) return;
+
+    // bid
+    if (side_ == Side::Bid) {
+        for (auto idx {best_idx_}; idx-- > 0;) {
+            if ( !rpl_[idx].orders.empty() ) {
+                best_idx_ = idx;
+                return;
+            }
+        }
+    }
+
+    // ask
+    else {
+        for (auto idx {best_idx_}; idx < NUM_LEVELS_; ++idx) {
+            if ( !rpl_[idx].orders.empty() ) {
+                best_idx_ = idx;
+                return;
+            }
+        }
+    }
+
+}
 
 
 
