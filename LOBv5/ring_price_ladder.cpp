@@ -14,8 +14,8 @@
 // physical idx = logical & MASK
 std::size_t RingPriceLadder::to_idx (Price p) const noexcept {
         
-    return static_cast<std::size_t>( p - base_price_ )
-           & MASK_;
+    return 
+        static_cast<std::size_t>( p - base_price_ ) & MASK_;
 }
 
 
@@ -111,12 +111,47 @@ void RingPriceLadder::update_best_after_remove (Price removed_price) noexcept {
 
 
 
-// void  RingPriceLadder::clear_level (Price new_price) noexcept {
-//
-//         auto& level     =  level (new_price);
-//         level.price     =  new_price;
-//         level.total_qty =  0;
-//
-//         level.orders.clear();
-// }
+void RingPriceLadder::remove (Order* order) noexcept {
+    
+    assert( order != nullptr );
 
+    PriceLevel& level = at_level( order->price );
+
+    // remove from FIFO
+    level.orders.erase( order );
+
+    // update total qty
+    level.total_qty -= order->qty;
+
+    // check if level still has orders
+    if ( !level.orders.empty() ) return;
+
+    // 1. if level becomes empty after remove
+    update_best_after_remove( order->price );
+
+    // 2. and reset the level
+    level.total_qty = 0;
+
+}
+
+
+void  RingPriceLadder::clear_level (Price new_price) noexcept {
+
+    PriceLevel& lvl    =  at_level( new_price );
+    lvl.price          =  new_price;
+    lvl.total_qty      =  0;
+
+    level.orders.clear();
+}
+
+
+PriceLevel* RingPriceLadder::best_level() noexcept {
+
+    return rpl_[best_idx_];
+}
+
+
+void RingPriceLadder::advance_window (Price new_base) {
+
+    assert( false && "NOTE: Not implemented yet.\n" );
+} 
