@@ -4,6 +4,8 @@
  * head_.next = first order, tail_.prev = last order
  * Empty     : head.next == &tail
  * One Node  : head.next == tail.prev
+ * clear()   : should only be called on already empty level
+ *             for O(1) to work
  * */
 
 
@@ -141,4 +143,16 @@ Order* IntrusiveList::next ( Order* p ) const noexcept {
     return (p->next == &tail_) 
                     ? nullptr 
                     : static_cast<Order*>( p->next );
+}
+
+
+// remove nodes b/w head and tail
+void IntrusiveList::clear() noexcept {
+
+    // link head to tail and vice versa
+    head_.next = &tail_;
+    tail_.prev = &head_;
+
+    // reset size of list
+    size_     = 0;
 }
