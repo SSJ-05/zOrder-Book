@@ -10,15 +10,11 @@
 #include <cstdint>
 
 
+
 struct PriceLadder {
 
-    // static constexpr Price MIN_PRICE  { 9'000 };
-    // static constexpr Price MAX_PRICE  { 11'000 };
-    // static constexpr std::size_t NUM_LEVELS { MAX_PRICE
-                                            // - MIN_PRICE + 1 };
-
     Price base_price_ {};
-    static constexpr std::size_t NUM_LEVELS { 1 << 12 };
+    static constexpr std::size_t NUM_LEVELS  { 1 << 12 };
 
     std::array<PriceLevel, NUM_LEVELS> ladder_ {};
 
