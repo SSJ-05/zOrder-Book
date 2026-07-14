@@ -22,8 +22,8 @@ private:
     [[ maybe_unused ]] std::byte    pad_[64 - sizeof(std::size_t)];
     
     // cold data - on separate cache line - avoid false sharing
-                std::size_t  size_;
-                std::byte*   memory_;
+    std::size_t  size_;
+    std::byte*   memory_;
 
 public:
     explicit Arena (std::size_t size) noexcept : size_(size) {
@@ -44,7 +44,7 @@ public:
         }
 
         // lock memory 
-        if (mlock(memory_, size) != 0) { 
+        if ( mlock(memory_, size) != 0 ) { 
             fprintf(stderr, "[Arena] FATAL : mlock failed.\n"
                             "Check R_LIMIT_MEMLOCK or run as root.\n");
             munmap(memory_, size_);
@@ -117,9 +117,9 @@ public:
     // reset without calling destructor (PREFERRED IN HOT PATH)
     void reset() noexcept { offset_ = 0; }
 
-    // for recycle list
+    // for recycle - return to freelist
     template <typename T>
-    void destroy(T*) noexcept {}
+    void recycle(T*) noexcept {}
 
     // statistics
     std::size_t used()        const noexcept { return offset_; }
