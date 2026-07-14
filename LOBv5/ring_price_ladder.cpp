@@ -45,8 +45,8 @@ const PriceLevel&  RingPriceLadder::at_level (Price p) const noexcept {
 
 void RingPriceLadder::add (Order* order) noexcept {
     
-    if ( !contains( order->price ) ) 
-        advance_window( order->price );
+    if ( !contains( order->price ) ) return;
+        // advance_window( order->price );
 
     PriceLevel& lvl = at_level( order->price );
         
@@ -165,7 +165,7 @@ PriceLevel* RingPriceLadder::best_level() noexcept {
 
 
 
-void RingPriceLadder::advance_window (Price new_base) {
-
-    assert( false && "NOTE: Not implemented yet.\n" );
-} 
+// void RingPriceLadder::advance_window ([[ maybe_unused ]]Price new_base) {
+//
+//     assert( false && "NOTE: Not implemented yet.\n" );
+// } 

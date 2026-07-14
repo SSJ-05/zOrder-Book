@@ -24,7 +24,7 @@ public:
 
     void   pop_front();
 
-    void   clear();
+    void   clear() noexcept;
 
     void   validate() const;
 

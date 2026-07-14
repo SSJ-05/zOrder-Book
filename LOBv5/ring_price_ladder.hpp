@@ -22,7 +22,7 @@ private:
     Side         side_        { Side::Bid };
     std::size_t  best_idx_    { INVALID_ };
 
-    std::array<PriceLevel, NUM_LEVELS_> rpl_ {};
+    std::array<PriceLevel, NUM_LEVELS_> rpl_;
 
 
 public:
@@ -50,6 +50,6 @@ public:
 
    
     // reserved for future versions
-    void advance_window (Price new_base);
+    // void advance_window (Price new_base);
 };
 

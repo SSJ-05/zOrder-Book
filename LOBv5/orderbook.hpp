@@ -7,6 +7,7 @@
 #include "trade.hpp"
 #include "price_level.hpp"
 #include "intrusive_listv2.hpp"
+#include "ring_price_ladder.hpp"
 
 #include <unordered_map>
 
@@ -34,9 +35,9 @@ private:
 
 public:
 
-    // Orderbook() : 
-    //     bids_( 10000, Side::Bid ),
-    //     asks_( 10000, Side::Ask ) {}
+    Orderbook() : 
+        bids_( 9000, Side::Bid ),
+        asks_( 9000, Side::Ask ) {}
 
     void add_order (Order*);
 

@@ -12,16 +12,11 @@
 
 using LevelQty = Qty;
 
-
 struct PriceLevel {
-
-    explicit PriceLevel (Price p) :     // a price level shouldnt change
-        price (p) {}
 
     Price     price      {};
     LevelQty  total_qty  {};
 
     IntrusiveList orders {};
-
 };
 

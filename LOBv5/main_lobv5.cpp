@@ -1,9 +1,9 @@
 // main src file// 07.07.26// ZeroK
 
 /* workflow
- * order generator -> ring 
- *      -> matching engine -> trade ring + book updates -> publisher
- * */
+ * order generator -> arena -> matching engine ->
+ *          orderbook -> ringpriceladder -> trade
+ */
 
 #include "orderv2.hpp"
 #include "trade.hpp"
@@ -18,10 +18,9 @@
 
 
 constexpr std::size_t ARENA_CAPACITY  { 1 << 15 };
-constexpr std::size_t ARENA_ORDERS    { 2 * ARENA_CAPACITY };
-constexpr std::size_t NUM_TRADES      { 1 << 4 };
+constexpr std::size_t MAX_ORDERS      { 2 * ARENA_CAPACITY };
+constexpr std::size_t NUM_TRADES      { 1 << 5 };
 
-static_assert (ARENA_CAPACITY >= 2 * NUM_TRADES);
 
 
 int main () {
@@ -32,7 +31,7 @@ int main () {
     MatchingEngine engine;
     OrderGenerator gen;
 
-    Arena arena (ARENA_ORDERS * sizeof(Order));
+    Arena arena (MAX_ORDERS * sizeof(Order));
 
 
     for (auto _ {NUM_TRADES}; _-- > 0;) {
@@ -42,9 +41,12 @@ int main () {
         engine.submit_order( order );
     }
 
-    engine.print_book();
+    // engine.print_book();     // for debugging only
 
-    arena.reset();
+    // arena.reset();   // for multiple sessions only
+
+    std::printf ("Arena: %zu / %zu\n", 
+                arena.used(), arena.capacity());
 
     std::printf ("\n\n=== zOrder Book Closed ===\n");
     std::printf ("\n\n=== Session Closed ===\n\n");

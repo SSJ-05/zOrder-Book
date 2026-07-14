@@ -13,9 +13,9 @@
 
 void MatchingEngine::submit_order (Order* order) {
 
+    Trade trade {};
     book_.add_order (order);
 
-    Trade trade {};
 
     while ( book_.match_order( trade ) ) {
 
@@ -46,8 +46,8 @@ void MatchingEngine::submit_order (Order* order) {
 
 
 // debuggin only
-void MatchingEngine::print_book() const noexcept {
-
-    book_.print_book();
-}
+// void MatchingEngine::print_book() const noexcept {
+//
+//     book_.print_book();
+// }
 
