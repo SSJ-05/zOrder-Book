@@ -8,7 +8,6 @@
 #include "price_level.hpp"
 #include "intrusive_listv2.hpp"
 
-#include <map>
 #include <unordered_map>
 
 
@@ -16,8 +15,7 @@
 // w/o this, scan the whole order_map_
 struct OrderLocation {
 
-    PriceLevel*  level  { nullptr };
-    Order*       order  { nullptr };
+    Order*  order  { nullptr };
 };
 
 
@@ -25,24 +23,21 @@ struct OrderLocation {
 class Orderbook {
 
 private:
-    using BidMap = std::map <Price, PriceLevel, std::greater<>> ;  
-    using AskMap = std::map <Price, PriceLevel> ;                  
 
-    BidMap bids_;
-    AskMap asks_;
-
-    using BidIterator = BidMap::iterator;
-    using AskIterator = AskMap::iterator;
+    RingPriceLadder bids_;
+    RingPriceLadder asks_;
 
     // order map to cancel/modify in O(1)
     std::unordered_map <OrderID, OrderLocation> order_map_;
-
-    // helper funcs
-    void erase_if_empty_bid (BidIterator);
-    void erase_if_empty_ask (AskIterator);
+    // ***benchmark before replacing std::unordered_map with flat_map
 
 
 public:
+
+    // Orderbook() : 
+    //     bids_( 10000, Side::Bid ),
+    //     asks_( 10000, Side::Ask ) {}
+
     void add_order (Order*);
 
     bool match_order (Trade&);
@@ -53,7 +48,7 @@ public:
     // copy order -> cancel_order -> change price,qty -> add_order
     bool modify_order (OrderID, Price, Qty);
 
-    void print_book () const noexcept;
+    void print_book() const noexcept;
 
 };
 
