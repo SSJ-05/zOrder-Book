@@ -5,8 +5,7 @@
 #include "types.hpp"
 #include "ring_price_ladder.hpp"
 
-#include <array>
-#include <cstdint>
+#include <cassert>
 
 
 // helper func to calculate index
@@ -35,25 +34,33 @@ PriceLevel&  RingPriceLadder::at_level (Price p) noexcept {
 
 
 
+// for read-only in print_book
+const PriceLevel&  RingPriceLadder::at_level (Price p) const noexcept {
+
+    assert( contains ( p ) );
+    return rpl_[to_idx( p )];
+}
+
+
+
 void RingPriceLadder::add (Order* order) noexcept {
     
     if ( !contains( order->price ) ) 
         advance_window( order->price );
 
-    else {
-        PriceLevel& level = at_level( order->price );
+    PriceLevel& lvl = at_level( order->price );
         
-        if ( level.price != order->price ) {
-            level.price      =  order->price;
-            level.total_qty  =  0;
-        }
-
-        level.orders.push_back( order );
-
-        level.total_qty += order->qty;
-
-        update_best_after_add( order->price );
+    if ( lvl.price != order->price ) {
+        lvl.price      =  order->price;
+        lvl.total_qty  =  0;
     }
+
+    lvl.orders.push_back( order );
+
+    lvl.total_qty += order->qty;
+
+    update_best_after_add( order->price );
+
 }
 
 
@@ -72,11 +79,11 @@ void RingPriceLadder::update_best_after_add (Price new_price) noexcept {
                        + static_cast<Price>( best_idx_ );
 
     if ( side_ == Side::Bid ) {
-        if ( new_price > best_price_ ) 
+        if ( new_price > best_price ) 
             best_idx_ = idx;
     }
     else {   // Ask
-        if ( new_price < best_price_ )
+        if ( new_price < best_price )
             best_idx_ = idx;
     }
 }
@@ -107,6 +114,8 @@ void RingPriceLadder::update_best_after_remove (Price removed_price) noexcept {
         }
     }
 
+    best_idx_ = INVALID_;
+
 }
 
 
@@ -115,24 +124,25 @@ void RingPriceLadder::remove (Order* order) noexcept {
     
     assert( order != nullptr );
 
-    PriceLevel& level = at_level( order->price );
+    PriceLevel& lvl = at_level( order->price );
 
     // remove from FIFO
-    level.orders.erase( order );
+    lvl.orders.erase( order );
 
     // update total qty
-    level.total_qty -= order->qty;
+    lvl.total_qty -= order->qty;
 
     // check if level still has orders
-    if ( !level.orders.empty() ) return;
+    if ( !lvl.orders.empty() ) return;
 
     // 1. if level becomes empty after remove
     update_best_after_remove( order->price );
 
     // 2. and reset the level
-    level.total_qty = 0;
+    lvl.total_qty = 0;
 
 }
+
 
 
 void  RingPriceLadder::clear_level (Price new_price) noexcept {
@@ -141,14 +151,18 @@ void  RingPriceLadder::clear_level (Price new_price) noexcept {
     lvl.price          =  new_price;
     lvl.total_qty      =  0;
 
-    level.orders.clear();
+    lvl.orders.clear();
 }
+
 
 
 PriceLevel* RingPriceLadder::best_level() noexcept {
 
-    return rpl_[best_idx_];
+    if ( best_idx_ == INVALID_ ) return nullptr;
+
+    return &rpl_[best_idx_];
 }
+
 
 
 void RingPriceLadder::advance_window (Price new_base) {
