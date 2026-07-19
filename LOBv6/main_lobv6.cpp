@@ -11,6 +11,7 @@
 #include "order_generator.hpp"
 #include "matching_engine.hpp"
 #include "arena.hpp"
+#include "order_pool.hpp"
 
 #include <cstdlib>
 #include <cstdio>
@@ -36,7 +37,8 @@ int main () {
 
     for (auto _ {NUM_TRADES}; _-- > 0;) {
         
-        Order* order = arena.create<Order>();
+        // Order* order = arena.create<Order>();
+        Order* order = pool.acquire();
         gen.next( order );
         engine.submit_order( order );
     }
