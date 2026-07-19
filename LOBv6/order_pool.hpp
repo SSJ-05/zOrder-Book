@@ -34,12 +34,15 @@ private:
     Arena& arena_;
 
 public:
-    explicit OrderPool( Arena arena )
+    explicit OrderPool( Arena& arena )
         : arena_( arena ) {}
 
     Order* acquire() {
-        return arena_.create_order<Order*>();
+        return arena_.create<Order>();
     }
 
+    void release( Order* ) {
+        
+    }
 };
 

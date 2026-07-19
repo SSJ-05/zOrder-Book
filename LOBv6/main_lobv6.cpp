@@ -1,8 +1,8 @@
 // main src file// 07.07.26// ZeroK
 
 /* workflow
- * order generator -> arena -> matching engine ->
- *          orderbook -> ringpriceladder -> trade
+ * order generator -> order_pool -> arena -> 
+ *      matching engine -> orderbook -> ringpriceladder -> trade
  */
 
 #include "orderv2.hpp"
@@ -18,9 +18,9 @@
 #include <cassert>
 
 
-constexpr std::size_t ARENA_CAPACITY  { 1 << 15 };
-constexpr std::size_t MAX_ORDERS      { 2 * ARENA_CAPACITY };
-constexpr std::size_t NUM_TRADES      { 1 << 9 };
+constexpr std::size_t  ARENA_CAPACITY  { 1 << 15 };
+constexpr std::size_t  MAX_ORDERS      { 2 * ARENA_CAPACITY };
+constexpr std::size_t  NUM_TRADES      { 1 << 9 };
 
 
 
@@ -32,7 +32,8 @@ int main () {
     MatchingEngine engine;
     OrderGenerator gen;
 
-    Arena arena (MAX_ORDERS * sizeof(Order));
+    Arena arena( MAX_ORDERS * sizeof( Order ) );
+    OrderPool( arena );
 
 
     for (auto _ {NUM_TRADES}; _-- > 0;) {
