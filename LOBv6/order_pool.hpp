@@ -84,7 +84,8 @@ public:
 
             hint_word_  =  word_idx;    // update hint for next iteration
 
-            const std::size_t slot = word_idx * BITS_PER_WORD_ + bit;
+            // const std::size_t slot = word_idx * BITS_PER_WORD_ + bit;
+            const std::size_t slot = (word_idx << BITS_PER_WORD_) | bit;
             
             return new ( &base_[ slot ] ) Order{};
             // placement new, bcoz allocate_array returns raw memory
@@ -92,7 +93,7 @@ public:
         }
 
         assert( false && "OrderPool exhausted\n" );
-        return nullptr;
+        return nullptr;     // out of memory
     }
 
 
