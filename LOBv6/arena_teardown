@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# teardown script for arena, 07.07.26, ZeroK
+
+
+set -e
+
+echo "--- HugePages Teardown ---"
+echo 0 | sudo tee /proc/sys/vm/nr_hugepages
+
+# # unmount hugetlbfs
+# if mountpoint -q /dev/hugepages; then
+#     sudo umount /dev/hugepages
+# fi
+
+echo "$(grep HugePages /proc/meminfo)"
+
