@@ -35,7 +35,7 @@ public:
                                                 )
                                          );
 
-        // fallback to normal pages and lock memory
+        // fallback - terminate if allocaton fails
         if (memory_ == MAP_FAILED) {
             memory_ = nullptr;
             fprintf(stderr, "[Arena] FATAL : hugepage allocation failed.\n"
@@ -64,7 +64,7 @@ public:
         }
     }
 
-    // no exceptions allocation, with default cache line 64 bytes
+    // no exceptions allocation
     [[nodiscard]]
     std::byte* allocate (std::size_t size, std::size_t alignment) noexcept {
         uintptr_t   current = reinterpret_cast<uintptr_t>(memory_ + offset_);
@@ -117,9 +117,15 @@ public:
     // reset without calling destructor (PREFERRED IN HOT PATH)
     void reset() noexcept { offset_ = 0; }
 
-    // for recycle - return to freelist
+
+    // allocate array for bitmap, return raw memory
     template <typename T>
-    void recycle(T*) noexcept {}
+    T* allocate_array( std::size_t count ) {
+        
+        auto* ptr = allocate( sizeof(T) * count, alignof(T) );
+        return reinterpret_cast<T*>( ptr );
+    }
+
 
     // statistics
     std::size_t used()        const noexcept { return offset_; }
@@ -138,5 +144,5 @@ public:
 // for reset use : echo 0 | sudo tee /proc/sys/vm/nr_hugepages
 // for info : grep Huge /proc/meminfo
 // check which hugepage size is available in linux : ls /sys/kernel/mm/hugepages/  
-// set the hugepage size to 2MB : echo 20 | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
+// set the hugepage size to 2MB: echo 20 | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
 
