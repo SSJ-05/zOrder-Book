@@ -72,10 +72,11 @@ public:
     [[ nodiscard ]]
     Order* acquire() noexcept {
 
-        for (std::size_t i{}; i < NUM_WORDS_; ++i) {
+        // for (std::size_t i{}; i < NUM_WORDS_; ++i) {
+        for (std::size_t i {NUM_WORDS_}; i-- > 0;) {
 
-            std::size_t  word_idx = (hint_word_ + 1) & (NUM_WORDS_ - 1);
-            std::uint64_t word = bitmap_[ word_idx ];   // word: 64-bit bitmap value
+            std::size_t  word_idx = (hint_word_ + i) & (NUM_WORDS_ - 1);  // wrap around logic
+            std::uint64_t word    = bitmap_[ word_idx ];   // word: 64-bit bitmap value
 
             if (word == 0) continue;
 
@@ -108,8 +109,8 @@ public:
 
         // 2. compute slot idx
         std::size_t slot = static_cast<std::size_t>( order - base_ );
-
         assert( slot < CAPACITY_ );
+
         // 3. locate bitmap word
         const std::size_t word = slot >> WORD_SHIFT_;     // divide by 64
         const std::size_t bit  = slot & (BITS_PER_WORD_ - 1);
