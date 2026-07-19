@@ -20,7 +20,7 @@
 
 constexpr std::size_t  ARENA_CAPACITY  { 1 << 15 };
 constexpr std::size_t  MAX_ORDERS      { 2 * ARENA_CAPACITY };
-constexpr std::size_t  NUM_TRADES      { 1 << 9 };
+constexpr std::size_t  NUM_TRADES      { 1 << 4 };
 
 
 
@@ -33,16 +33,17 @@ int main () {
     OrderGenerator gen;
 
     Arena arena( MAX_ORDERS * sizeof( Order ) );
-    OrderPool( arena );
+    OrderPool pool( arena );
 
 
     for (auto _ {NUM_TRADES}; _-- > 0;) {
         
-        // Order* order = arena.create<Order>();
         Order* order = pool.acquire();
+        std::printf( "%p\n", order );
         gen.next( order );
-        engine.submit_order( order );
+        // engine.submit_order( order );
     }
+
 
     // engine.print_book();     // for debugging only
 
