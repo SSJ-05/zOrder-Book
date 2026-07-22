@@ -21,6 +21,18 @@ struct OrderLocation {
 
 
 
+// DTO: Data Transfer Obj
+// transfer match result from orderbook to matching engine
+struct MatchResult {
+
+	bool		matched {};
+	Trade   	trade;
+	Order*  	released [2] {};	// buy and/or sell - 2 orders/cases
+	std::uint8_t	released_count {};	// counts cases to be released to pool
+};
+
+
+
 class Orderbook {
 
 private:
@@ -39,15 +51,16 @@ public:
         bids_( 9000, Side::Bid ),
         asks_( 9000, Side::Ask ) {}
 
+
     void add_order (Order*);
 
-    bool match_order (Trade&);
+    bool match_order (MatchResult&);
 
     // uo map lookup -> erase order -> erase hash entry
-    bool cancel_order (OrderID);    
+    Order*  cancel_order (OrderID);    
 
     // copy order -> cancel_order -> change price,qty -> add_order
-    bool modify_order (OrderID, Price, Qty);
+    Order*  modify_order (OrderID, Price, Qty);
 
     void print_book() const noexcept;
 

@@ -13,7 +13,7 @@
 
 void Orderbook::add_order (Order* order) {
 
-    if (order->side == Side::Bid)
+    if ( order->side == Side::Bid )
         bids_.add( order );
     else 
         asks_.add( order );
@@ -26,7 +26,7 @@ void Orderbook::add_order (Order* order) {
 }
 
 
-bool Orderbook::cancel_order (OrderID id) {
+Order*  Orderbook::cancel_order (OrderID id) {
 
     // lookup order in hashmap
     auto pos = order_map_.find( id );
@@ -42,14 +42,14 @@ bool Orderbook::cancel_order (OrderID id) {
 
     order_map_.erase( pos );    // erase hash entry O(1)
 
-    return true;
+    return order;
 }
 
 
 
-bool Orderbook::modify_order ( OrderID id, 
-                               Price new_price, 
-                               Qty new_qty ) {
+Order*  Orderbook::modify_order ( OrderID id, 
+                                  Price new_price, 
+                        	  Qty new_qty ) {
 
     auto pos = order_map_.find( id );
     if ( pos == order_map_.end() ) 
@@ -64,12 +64,12 @@ bool Orderbook::modify_order ( OrderID id,
 
     add_order( order );
 
-    return true;
+    return order;
 }
 
 
 
-bool Orderbook::match_order ( Trade& trade ) {
+bool Orderbook::match_order ( MatchResult& result ) {
 
     PriceLevel* bid_lvl = bids_.best_level();
     PriceLevel* ask_lvl = asks_.best_level();
@@ -99,16 +99,20 @@ bool Orderbook::match_order ( Trade& trade ) {
     trade.sell_price = ask_lvl->price;
     trade.exec_price = ask_lvl->price;
 
+
+    // order obj leaves the orderbook at this
     // remove bid ask for matched orders
-    // first erase from order_map then pop from BidMap
-    // to avoid dangling refs
     if ( bid->qty == 0 ) {
         order_map_.erase( bid->id );
         bids_.remove( bid );
+
+	result.released [ result.released_count++ ] = bid;  // set the status for release
     }
     if ( ask->qty == 0 ) {
         order_map_.erase( ask->id );
         asks_.remove( ask );
+
+	result.released [ result.released_count++ ] = ask;
     }
 
     return true;
@@ -211,3 +215,4 @@ bool Orderbook::match_order ( Trade& trade ) {
 //
 //     std::printf("======================================\n\n");
 // }
+
