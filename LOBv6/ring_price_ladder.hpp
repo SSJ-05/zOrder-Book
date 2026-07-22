@@ -44,9 +44,8 @@ public:
     bool         contains (Price) const noexcept;
 
     const PriceLevel&  at_level (Price) const noexcept;
-          PriceLevel&  at_level (Price) noexcept;
-    
-    PriceLevel*  best_level()  noexcept;
+          PriceLevel&  at_level (Price)       noexcept;
+    	  PriceLevel*  best_level()           noexcept;
 
    
     // reserved for future versions

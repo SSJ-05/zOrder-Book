@@ -31,9 +31,9 @@ Order*  Orderbook::cancel_order (OrderID id) {
     // lookup order in hashmap
     auto pos = order_map_.find( id );
     if ( pos == order_map_.end() ) 
-        return false;
+        return nullptr;
 
-    Order* order = pos->second.order;   // cache the ptr
+    Order* order = pos->second.order;   // cache the ptr before remove
 
     if ( order->side == Side::Bid )
         bids_.remove( order );
@@ -53,7 +53,7 @@ Order*  Orderbook::modify_order ( OrderID id,
 
     auto pos = order_map_.find( id );
     if ( pos == order_map_.end() ) 
-        return false;
+        return nullptr;
 
     Order* order = pos->second.order;
 
@@ -84,20 +84,20 @@ bool Orderbook::match_order ( MatchResult& result ) {
     Order* ask = ask_lvl->orders.front();
 
     // update trade members
-    trade.qty = std::min (bid->qty, ask->qty);
-    bid->qty  -= trade.qty;
-    ask->qty  -= trade.qty;
+    result.trade.qty = std::min (bid->qty, ask->qty);
+    bid->qty  -= result.trade.qty;
+    ask->qty  -= result.trade.qty;
 
     // update LevelQty and price
-    bid_lvl->total_qty -= trade.qty;
-    ask_lvl->total_qty -= trade.qty;
+    bid_lvl->total_qty -= result.trade.qty;
+    ask_lvl->total_qty -= result.trade.qty;
 
-    trade.buy_id  = bid->id;
-    trade.sell_id = ask->id;
+    result.trade.buy_id  = bid->id;
+    result.trade.sell_id = ask->id;
 
-    trade.buy_price  = bid_lvl->price;
-    trade.sell_price = ask_lvl->price;
-    trade.exec_price = ask_lvl->price;
+    result.trade.buy_price  = bid_lvl->price;
+    result.trade.sell_price = ask_lvl->price;
+    result.trade.exec_price = ask_lvl->price;
 
 
     // order obj leaves the orderbook at this

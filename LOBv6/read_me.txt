@@ -58,7 +58,7 @@ Orderbook
 
 
 
-**architectural separation:
+**Architectural separation:
 - Orderbook coordinates the engine.
 - RingPriceLadder owns one side of the book.
 - PriceLevel owns FIFO.

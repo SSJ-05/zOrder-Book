@@ -20,7 +20,7 @@
 
 constexpr std::size_t  ARENA_CAPACITY  { 1 << 15 };
 constexpr std::size_t  MAX_ORDERS      { 2 * ARENA_CAPACITY };
-constexpr std::size_t  NUM_TRADES      { 1 << 4 };
+constexpr std::size_t  NUM_TRADES      { 1 << 10 };
 
 
 
@@ -28,20 +28,21 @@ int main () {
 
     std::printf ("\n\n=== Session Open ===\n\n");
 
-    std::printf ("size of order: %zu\n", sizeof(Order));
-    MatchingEngine engine;
-    OrderGenerator gen;
+    std::printf ("size of order: %zu\n", sizeof(Order));  // debugging only
 
-    Arena arena( MAX_ORDERS * sizeof( Order ) );
-    OrderPool pool( arena );
+    Arena arena (MAX_ORDERS * sizeof( Order ));
+    OrderPool pool (arena);
+
+    MatchingEngine engine (pool);
+    OrderGenerator gen;
 
 
     for (auto _ {NUM_TRADES}; _-- > 0;) {
         
         Order* order = pool.acquire();
-        std::printf( "%p\n", order );
+
         gen.next( order );
-        // engine.submit_order( order );
+        engine.submit_order( order );
     }
 
 

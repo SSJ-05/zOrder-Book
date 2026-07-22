@@ -33,7 +33,7 @@ OrderPool
 void MatchingEngine::submit_order (Order* order) {
 
     MatchResult result;
-    book_.add_order (order);
+    book_.add_order( order );
 
 
     while ( book_.match_order( result ) ) {
@@ -70,6 +70,9 @@ void MatchingEngine::submit_order (Order* order) {
 		
 		pool_.release( result.released [i] );
 	}
+
+	if (book_.cancel_order( result.trade.trade_id ))
+		pool_.release( order );
     }
 
 }

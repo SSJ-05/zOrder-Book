@@ -8,6 +8,7 @@
 #include <unistd.h>     // for sysconf
 #include <cerrno>       // for fprintf error context
 #include <cstdio>       // for fprintf
+#include <exception>	// for std::terminate
 #include <new>
 #include <type_traits>
 
@@ -28,12 +29,14 @@ private:
 public:
     explicit Arena (std::size_t size) noexcept : size_(size) {
         // Hugepage backed and lock memory
-        memory_ = static_cast<std::byte*>( mmap (   nullptr, size,
-                                                    PROT_READ | PROT_WRITE, 
-                                                    MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB,
-                                                    -1, 0
-                                                )
-                                         );
+        memory_ = static_cast<std::byte*>( 
+			mmap (   
+				nullptr, size,
+                                PROT_READ | PROT_WRITE, 
+                                MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB,
+                                -1, 0
+                              ) );
+
 
         // fallback - terminate if allocaton fails
         if (memory_ == MAP_FAILED) {
@@ -67,6 +70,7 @@ public:
     // no exceptions allocation
     [[nodiscard]]
     std::byte* allocate (std::size_t size, std::size_t alignment) noexcept {
+
         uintptr_t   current = reinterpret_cast<uintptr_t>(memory_ + offset_);
         uintptr_t   aligned = (current + alignment - 1) & ~(alignment - 1);
         std::size_t padding = aligned - current;
@@ -82,6 +86,7 @@ public:
     // create order
     template<typename T, typename... Args>
     T* create (Args&&... args) noexcept (std::is_nothrow_constructible_v<T, Args...>) {
+
         std::byte* ptr = allocate(sizeof(T), alignof(T));
         if (!ptr) return nullptr;
         return new (ptr) T(std::forward<Args>(args)...);
@@ -102,6 +107,7 @@ public:
     // warm cache before hot path
     // L1 residency
     void warm_cache() noexcept {
+
         constexpr std::size_t  CL   { 64 };     // 64 stride Cache Line
         constexpr std::size_t  PD   { CL * 8 }; // Prefetch Distance
         volatile  std::uint8_t sink { 0 };      // prevent compiler from optimizing
