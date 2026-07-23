@@ -96,7 +96,7 @@ void RingPriceLadder::update_best_after_remove (Price removed_price) noexcept {
 
     // bid
     if (side_ == Side::Bid) {
-        for (auto idx {best_idx_}; idx-- > 0;) {
+        for (auto idx {0uz}; idx < best_idx_; ++idx) {
             if ( !rpl_[idx].orders.empty() ) {
                 best_idx_ = idx;
                 return;
@@ -157,6 +157,13 @@ void  RingPriceLadder::clear_level (Price new_price) noexcept {
 
 
 PriceLevel* RingPriceLadder::best_level() noexcept {
+
+    if ( best_idx_ == INVALID_ ) return nullptr;
+
+    return &rpl_[best_idx_];
+}
+
+const PriceLevel* RingPriceLadder::best_level() const noexcept {
 
     if ( best_idx_ == INVALID_ ) return nullptr;
 
