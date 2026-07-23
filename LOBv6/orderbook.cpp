@@ -125,67 +125,89 @@ void Orderbook::print_book() const noexcept {
     std::printf(
         "\n================== zORDER BOOK ==================\n\n");
 
-    if (bids_.empty())
+    const PriceLevel* bid = bids_.best_level();
+    const PriceLevel* ask = asks_.best_level();
+
+    if ( !bid )
         std::printf("Best Bid : EMPTY\n");
     else
         std::printf("Best Bid : %.2f\n",
-                    to_price(bids_.best_level()->price));
+                    to_price(bid->price));
 
-    if (asks_.empty())
+    if ( !ask )
         std::printf("Best Ask : EMPTY\n");
     else
         std::printf("Best Ask : %.2f\n",
-                    to_price(asks_.best_level()->price));
+                    to_price(ask->price));
 
-    if (!bids_.empty() && !asks_.empty())
+    if ( bid && ask )
         std::printf("Spread   : %.2f\n",
-                    to_price(asks_.best_price() - bids_.best_level()->price));
+                     to_price(ask->price - bid->price));
     else
         std::printf("Spread   : N/A\n");
 
     std::printf("\n=================================================\n");
 
-    auto print_side = [](const auto& ladder, const char* side)
+std::printf("\n--------------- BIDS ----------------\n\n");
+
+bids_.for_each_level([&](Price price, const PriceLevel& level)
+{
+    std::printf(
+        "Price : %.2f    Total Qty : %u     Orders : %zu\n",
+        to_price(price),
+        level.total_qty,
+        level.orders.size());
+
+    std::printf(
+        "%-10s %-10s %-10s\n",
+        "ID",
+        "QTY",
+        "SIDE");
+
+    for (Order* p = level.orders.front();
+         p;
+         p = level.orders.next(p))
     {
-        std::printf("\n---------------- %s ----------------\n\n", side);
+        std::printf(
+            "%-10llu %-10u %-10s\n",
+            static_cast<unsigned long long>(p->id),
+            p->qty,
+            "BID");
+    }
 
-        if (ladder.empty()) {
-            std::printf("EMPTY\n");
-            return;
-        }
+    std::printf("\n");
+});
 
-        for (const auto& [price, level] : ladder) {
 
-            std::printf(
-                "[ %.2f ]  Qty : %-6u Orders : %-3zu\n",
-                to_price(price),
-                level.total_qty,
-                level.orders.size());
+std::printf("\n--------------- ASKS ----------------\n\n");
 
-            std::printf(
-                "-------------------------------------------------\n");
+asks_.for_each_level([&](Price price, const PriceLevel& level)
+{
+    std::printf(
+        "Price : %.2f    Total Qty : %u     Orders : %zu\n",
+        to_price(price),
+        level.total_qty,
+        level.orders.size());
 
-            std::printf(
-                "%-10s %-8s\n",
-                "OrderID",
-                "Qty");
+    std::printf(
+        "%-10s %-10s %-10s\n",
+        "ID",
+        "QTY",
+        "SIDE");
 
-            for (Order* p = level.orders.front();
-                 p;
-                 p = level.orders.next(p))
-            {
-                std::printf(
-                    "%-10llu %-8u\n",
-                    static_cast<unsigned long long>(p->id),
-                    p->qty);
-            }
+    for (Order* p = level.orders.front();
+         p;
+         p = level.orders.next(p))
+    {
+        std::printf(
+            "%-10llu %-10u %-10s\n",
+            static_cast<unsigned long long>(p->id),
+            p->qty,
+            "BID");
+    }
 
-            std::printf("\n");
-        }
-    };
-
-    print_side(bids_, "BIDS");
-    print_side(asks_, "ASKS");
+    std::printf("\n");
+});
 
     std::printf(
         "=================================================\n\n");

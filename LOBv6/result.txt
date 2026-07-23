@@ -1,0 +1,945 @@
+
+
+=== Session Open ===
+
+size of order: 48
+TRADE:
+Time    : 13910011948612
+TradeID : 1
+BuyID   : 1
+SellID  : 2
+Qty     : 1
+Exec Px : 99.96
+Buy Px  : 99.98
+Sell Px : 99.96
+......................
+TRADE:
+Time    : 13910012015640
+TradeID : 2
+BuyID   : 3
+SellID  : 2
+Qty     : 16
+Exec Px : 99.96
+Buy Px  : 99.98
+Sell Px : 99.96
+......................
+TRADE:
+Time    : 13910012040002
+TradeID : 3
+BuyID   : 8
+SellID  : 7
+Qty     : 17
+Exec Px : 100.01
+Buy Px  : 100.03
+Sell Px : 100.01
+......................
+TRADE:
+Time    : 13910012051338
+TradeID : 4
+BuyID   : 8
+SellID  : 9
+Qty     : 34
+Exec Px : 100.03
+Buy Px  : 100.03
+Sell Px : 100.03
+......................
+TRADE:
+Time    : 13910012073802
+TradeID : 5
+BuyID   : 10
+SellID  : 9
+Qty     : 16
+Exec Px : 100.03
+Buy Px  : 100.05
+Sell Px : 100.03
+......................
+TRADE:
+Time    : 13910012084176
+TradeID : 6
+BuyID   : 10
+SellID  : 11
+Qty     : 20
+Exec Px : 100.03
+Buy Px  : 100.05
+Sell Px : 100.03
+......................
+TRADE:
+Time    : 13910012100504
+TradeID : 7
+BuyID   : 13
+SellID  : 14
+Qty     : 14
+Exec Px : 100.04
+Buy Px  : 100.04
+Sell Px : 100.04
+......................
+TRADE:
+Time    : 13910012110410
+TradeID : 8
+BuyID   : 16
+SellID  : 15
+Qty     : 10
+Exec Px : 100.06
+Buy Px  : 100.07
+Sell Px : 100.06
+......................
+TRADE:
+Time    : 13910012132120
+TradeID : 9
+BuyID   : 17
+SellID  : 15
+Qty     : 15
+Exec Px : 100.06
+Buy Px  : 100.07
+Sell Px : 100.06
+......................
+TRADE:
+Time    : 13910012153908
+TradeID : 10
+BuyID   : 17
+SellID  : 18
+Qty     : 61
+Exec Px : 100.06
+Buy Px  : 100.07
+Sell Px : 100.06
+......................
+TRADE:
+Time    : 13910012158250
+TradeID : 11
+BuyID   : 19
+SellID  : 11
+Qty     : 56
+Exec Px : 100.03
+Buy Px  : 100.05
+Sell Px : 100.03
+......................
+TRADE:
+Time    : 13910012161812
+TradeID : 12
+BuyID   : 19
+SellID  : 20
+Qty     : 4
+Exec Px : 100.03
+Buy Px  : 100.05
+Sell Px : 100.03
+......................
+TRADE:
+Time    : 13910012171510
+TradeID : 13
+BuyID   : 19
+SellID  : 14
+Qty     : 1
+Exec Px : 100.04
+Buy Px  : 100.05
+Sell Px : 100.04
+......................
+TRADE:
+Time    : 13910012181884
+TradeID : 14
+BuyID   : 23
+SellID  : 21
+Qty     : 27
+Exec Px : 100.02
+Buy Px  : 100.06
+Sell Px : 100.02
+......................
+TRADE:
+Time    : 13910012191608
+TradeID : 15
+BuyID   : 24
+SellID  : 21
+Qty     : 19
+Exec Px : 100.02
+Buy Px  : 100.04
+Sell Px : 100.02
+......................
+TRADE:
+Time    : 13910012196314
+TradeID : 16
+BuyID   : 28
+SellID  : 21
+Qty     : 34
+Exec Px : 100.02
+Buy Px  : 100.02
+Sell Px : 100.02
+......................
+TRADE:
+Time    : 13910012205518
+TradeID : 17
+BuyID   : 28
+SellID  : 25
+Qty     : 15
+Exec Px : 100.02
+Buy Px  : 100.02
+Sell Px : 100.02
+......................
+TRADE:
+Time    : 13910012209340
+TradeID : 18
+BuyID   : 29
+SellID  : 25
+Qty     : 79
+Exec Px : 100.02
+Buy Px  : 100.04
+Sell Px : 100.02
+......................
+TRADE:
+Time    : 13910012212824
+TradeID : 19
+BuyID   : 29
+SellID  : 26
+Qty     : 7
+Exec Px : 100.02
+Buy Px  : 100.04
+Sell Px : 100.02
+......................
+TRADE:
+Time    : 13910012221976
+TradeID : 20
+BuyID   : 29
+SellID  : 22
+Qty     : 4
+Exec Px : 100.04
+Buy Px  : 100.04
+Sell Px : 100.04
+......................
+TRADE:
+Time    : 13910012226188
+TradeID : 21
+BuyID   : 30
+SellID  : 31
+Qty     : 32
+Exec Px : 100.03
+Buy Px  : 100.03
+Sell Px : 100.03
+......................
+TRADE:
+Time    : 13910012235600
+TradeID : 22
+BuyID   : 30
+SellID  : 32
+Qty     : 30
+Exec Px : 100.02
+Buy Px  : 100.03
+Sell Px : 100.02
+......................
+TRADE:
+Time    : 13910012239552
+TradeID : 23
+BuyID   : 27
+SellID  : 33
+Qty     : 68
+Exec Px : 100.00
+Buy Px  : 100.00
+Sell Px : 100.00
+......................
+TRADE:
+Time    : 13910012249276
+TradeID : 24
+BuyID   : 27
+SellID  : 34
+Qty     : 12
+Exec Px : 100.00
+Buy Px  : 100.00
+Sell Px : 100.00
+......................
+TRADE:
+Time    : 13910012258636
+TradeID : 25
+BuyID   : 35
+SellID  : 34
+Qty     : 32
+Exec Px : 100.00
+Buy Px  : 100.00
+Sell Px : 100.00
+......................
+TRADE:
+Time    : 13910012262900
+TradeID : 26
+BuyID   : 39
+SellID  : 36
+Qty     : 68
+Exec Px : 99.99
+Buy Px  : 99.99
+Sell Px : 99.99
+......................
+TRADE:
+Time    : 13910012392120
+TradeID : 27
+BuyID   : 39
+SellID  : 38
+Qty     : 7
+Exec Px : 99.99
+Buy Px  : 99.99
+Sell Px : 99.99
+......................
+TRADE:
+Time    : 13910012396540
+TradeID : 28
+BuyID   : 37
+SellID  : 40
+Qty     : 48
+Exec Px : 99.97
+Buy Px  : 99.98
+Sell Px : 99.97
+......................
+TRADE:
+Time    : 13910012406160
+TradeID : 29
+BuyID   : 41
+SellID  : 42
+Qty     : 4
+Exec Px : 99.93
+Buy Px  : 99.95
+Sell Px : 99.93
+......................
+TRADE:
+Time    : 13910012415182
+TradeID : 30
+BuyID   : 51
+SellID  : 52
+Qty     : 50
+Exec Px : 99.87
+Buy Px  : 99.89
+Sell Px : 99.87
+......................
+TRADE:
+Time    : 13910012420746
+TradeID : 31
+BuyID   : 54
+SellID  : 59
+Qty     : 38
+Exec Px : 99.85
+Buy Px  : 99.86
+Sell Px : 99.85
+......................
+TRADE:
+Time    : 13910012424152
+TradeID : 32
+BuyID   : 54
+SellID  : 56
+Qty     : 47
+Exec Px : 99.86
+Buy Px  : 99.86
+Sell Px : 99.86
+......................
+TRADE:
+Time    : 13910012433252
+TradeID : 33
+BuyID   : 58
+SellID  : 56
+Qty     : 6
+Exec Px : 99.86
+Buy Px  : 99.86
+Sell Px : 99.86
+......................
+TRADE:
+Time    : 13910012439310
+TradeID : 34
+BuyID   : 65
+SellID  : 67
+Qty     : 37
+Exec Px : 99.83
+Buy Px  : 99.85
+Sell Px : 99.83
+......................
+TRADE:
+Time    : 13910012444822
+TradeID : 35
+BuyID   : 55
+SellID  : 71
+Qty     : 6
+Exec Px : 99.84
+Buy Px  : 99.84
+Sell Px : 99.84
+......................
+TRADE:
+Time    : 13910012448306
+TradeID : 36
+BuyID   : 55
+SellID  : 72
+Qty     : 46
+Exec Px : 99.84
+Buy Px  : 99.84
+Sell Px : 99.84
+......................
+TRADE:
+Time    : 13910012451556
+TradeID : 37
+BuyID   : 60
+SellID  : 72
+Qty     : 43
+Exec Px : 99.84
+Buy Px  : 99.84
+Sell Px : 99.84
+......................
+TRADE:
+Time    : 13910012455664
+TradeID : 38
+BuyID   : 74
+SellID  : 75
+Qty     : 2
+Exec Px : 99.82
+Buy Px  : 99.82
+Sell Px : 99.82
+......................
+TRADE:
+Time    : 13910012459876
+TradeID : 39
+BuyID   : 63
+SellID  : 76
+Qty     : 65
+Exec Px : 99.84
+Buy Px  : 99.86
+Sell Px : 99.84
+......................
+TRADE:
+Time    : 13910012468950
+TradeID : 40
+BuyID   : 77
+SellID  : 76
+Qty     : 14
+Exec Px : 99.84
+Buy Px  : 99.86
+Sell Px : 99.84
+......................
+TRADE:
+Time    : 13910012472668
+TradeID : 41
+BuyID   : 78
+SellID  : 76
+Qty     : 18
+Exec Px : 99.84
+Buy Px  : 99.86
+Sell Px : 99.84
+......................
+TRADE:
+Time    : 13910012476022
+TradeID : 42
+BuyID   : 78
+SellID  : 56
+Qty     : 44
+Exec Px : 99.86
+Buy Px  : 99.86
+Sell Px : 99.86
+......................
+TRADE:
+Time    : 13910012479532
+TradeID : 43
+BuyID   : 78
+SellID  : 61
+Qty     : 23
+Exec Px : 99.86
+Buy Px  : 99.86
+Sell Px : 99.86
+......................
+TRADE:
+Time    : 13910012483562
+TradeID : 44
+BuyID   : 53
+SellID  : 57
+Qty     : 63
+Exec Px : 99.87
+Buy Px  : 99.88
+Sell Px : 99.87
+......................
+TRADE:
+Time    : 13910012487072
+TradeID : 45
+BuyID   : 53
+SellID  : 64
+Qty     : 10
+Exec Px : 99.87
+Buy Px  : 99.88
+Sell Px : 99.87
+......................
+TRADE:
+Time    : 13910012490556
+TradeID : 46
+BuyID   : 53
+SellID  : 62
+Qty     : 6
+Exec Px : 99.88
+Buy Px  : 99.88
+Sell Px : 99.88
+......................
+TRADE:
+Time    : 13910012494378
+TradeID : 47
+BuyID   : 53
+SellID  : 82
+Qty     : 5
+Exec Px : 99.88
+Buy Px  : 99.88
+Sell Px : 99.88
+......................
+TRADE:
+Time    : 13910012497654
+TradeID : 48
+BuyID   : 81
+SellID  : 82
+Qty     : 51
+Exec Px : 99.88
+Buy Px  : 99.88
+Sell Px : 99.88
+......................
+TRADE:
+Time    : 13910012524850
+TradeID : 49
+BuyID   : 81
+SellID  : 83
+Qty     : 24
+Exec Px : 99.88
+Buy Px  : 99.88
+Sell Px : 99.88
+......................
+TRADE:
+Time    : 13910012535276
+TradeID : 50
+BuyID   : 86
+SellID  : 87
+Qty     : 46
+Exec Px : 99.86
+Buy Px  : 99.87
+Sell Px : 99.86
+......................
+TRADE:
+Time    : 13910012539800
+TradeID : 51
+BuyID   : 60
+SellID  : 89
+Qty     : 39
+Exec Px : 99.82
+Buy Px  : 99.84
+Sell Px : 99.82
+......................
+TRADE:
+Time    : 13910012543180
+TradeID : 52
+BuyID   : 66
+SellID  : 89
+Qty     : 18
+Exec Px : 99.82
+Buy Px  : 99.84
+Sell Px : 99.82
+......................
+TRADE:
+Time    : 13910012546404
+TradeID : 53
+BuyID   : 73
+SellID  : 89
+Qty     : 2
+Exec Px : 99.82
+Buy Px  : 99.84
+Sell Px : 99.82
+......................
+TRADE:
+Time    : 13910012587588
+TradeID : 54
+BuyID   : 73
+SellID  : 88
+Qty     : 84
+Exec Px : 99.84
+Buy Px  : 99.84
+Sell Px : 99.84
+......................
+TRADE:
+Time    : 13910012590838
+TradeID : 55
+BuyID   : 73
+SellID  : 90
+Qty     : 9
+Exec Px : 99.84
+Buy Px  : 99.84
+Sell Px : 99.84
+......................
+TRADE:
+Time    : 13910012593984
+TradeID : 56
+BuyID   : 79
+SellID  : 90
+Qty     : 41
+Exec Px : 99.84
+Buy Px  : 99.84
+Sell Px : 99.84
+......................
+TRADE:
+Time    : 13910012598456
+TradeID : 57
+BuyID   : 91
+SellID  : 90
+Qty     : 27
+Exec Px : 99.84
+Buy Px  : 99.84
+Sell Px : 99.84
+......................
+TRADE:
+Time    : 13910012602616
+TradeID : 58
+BuyID   : 91
+SellID  : 93
+Qty     : 18
+Exec Px : 99.83
+Buy Px  : 99.84
+Sell Px : 99.83
+......................
+TRADE:
+Time    : 13910012606464
+TradeID : 59
+BuyID   : 91
+SellID  : 94
+Qty     : 12
+Exec Px : 99.83
+Buy Px  : 99.84
+Sell Px : 99.83
+......................
+TRADE:
+Time    : 13910012610884
+TradeID : 60
+BuyID   : 91
+SellID  : 98
+Qty     : 41
+Exec Px : 99.80
+Buy Px  : 99.84
+Sell Px : 99.80
+......................
+TRADE:
+Time    : 13910012614160
+TradeID : 61
+BuyID   : 92
+SellID  : 98
+Qty     : 37
+Exec Px : 99.80
+Buy Px  : 99.84
+Sell Px : 99.80
+......................
+TRADE:
+Time    : 13910012617410
+TradeID : 62
+BuyID   : 95
+SellID  : 98
+Qty     : 16
+Exec Px : 99.80
+Buy Px  : 99.84
+Sell Px : 99.80
+......................
+TRADE:
+Time    : 13910012621440
+TradeID : 63
+BuyID   : 70
+SellID  : 100
+Qty     : 39
+Exec Px : 99.81
+Buy Px  : 99.83
+Sell Px : 99.81
+......................
+TRADE:
+Time    : 13910012625002
+TradeID : 64
+BuyID   : 101
+SellID  : 100
+Qty     : 26
+Exec Px : 99.81
+Buy Px  : 99.83
+Sell Px : 99.81
+......................
+TRADE:
+Time    : 13910012629006
+TradeID : 65
+BuyID   : 101
+SellID  : 103
+Qty     : 9
+Exec Px : 99.83
+Buy Px  : 99.83
+Sell Px : 99.83
+......................
+TRADE:
+Time    : 13910012633764
+TradeID : 66
+BuyID   : 107
+SellID  : 104
+Qty     : 48
+Exec Px : 99.84
+Buy Px  : 99.88
+Sell Px : 99.84
+......................
+TRADE:
+Time    : 13910012642942
+TradeID : 67
+BuyID   : 107
+SellID  : 105
+Qty     : 16
+Exec Px : 99.84
+Buy Px  : 99.88
+Sell Px : 99.84
+......................
+TRADE:
+Time    : 13910012652510
+TradeID : 68
+BuyID   : 109
+SellID  : 105
+Qty     : 7
+Exec Px : 99.84
+Buy Px  : 99.89
+Sell Px : 99.84
+......................
+TRADE:
+Time    : 13910012770706
+TradeID : 69
+BuyID   : 110
+SellID  : 105
+Qty     : 26
+Exec Px : 99.84
+Buy Px  : 99.88
+Sell Px : 99.84
+......................
+TRADE:
+Time    : 13910012784772
+TradeID : 70
+BuyID   : 110
+SellID  : 102
+Qty     : 34
+Exec Px : 99.85
+Buy Px  : 99.88
+Sell Px : 99.85
+......................
+TRADE:
+Time    : 13910012790310
+TradeID : 71
+BuyID   : 112
+SellID  : 102
+Qty     : 4
+Exec Px : 99.85
+Buy Px  : 99.90
+Sell Px : 99.85
+......................
+TRADE:
+Time    : 13910012795224
+TradeID : 72
+BuyID   : 112
+SellID  : 87
+Qty     : 21
+Exec Px : 99.86
+Buy Px  : 99.90
+Sell Px : 99.86
+......................
+TRADE:
+Time    : 13910012808510
+TradeID : 73
+BuyID   : 112
+SellID  : 106
+Qty     : 18
+Exec Px : 99.86
+Buy Px  : 99.90
+Sell Px : 99.86
+......................
+TRADE:
+Time    : 13910012818052
+TradeID : 74
+BuyID   : 113
+SellID  : 106
+Qty     : 50
+Exec Px : 99.86
+Buy Px  : 99.91
+Sell Px : 99.86
+......................
+TRADE:
+Time    : 13910012822134
+TradeID : 75
+BuyID   : 114
+SellID  : 106
+Qty     : 15
+Exec Px : 99.86
+Buy Px  : 99.93
+Sell Px : 99.86
+......................
+TRADE:
+Time    : 13910012831104
+TradeID : 76
+BuyID   : 114
+SellID  : 83
+Qty     : 34
+Exec Px : 99.88
+Buy Px  : 99.93
+Sell Px : 99.88
+......................
+TRADE:
+Time    : 13910012834640
+TradeID : 77
+BuyID   : 115
+SellID  : 83
+Qty     : 30
+Exec Px : 99.88
+Buy Px  : 99.91
+Sell Px : 99.88
+......................
+TRADE:
+Time    : 13910012838332
+TradeID : 78
+BuyID   : 115
+SellID  : 111
+Qty     : 48
+Exec Px : 99.88
+Buy Px  : 99.91
+Sell Px : 99.88
+......................
+TRADE:
+Time    : 13910012842128
+TradeID : 79
+BuyID   : 115
+SellID  : 85
+Qty     : 4
+Exec Px : 99.89
+Buy Px  : 99.91
+Sell Px : 99.89
+......................
+TRADE:
+Time    : 13910012910222
+TradeID : 80
+BuyID   : 115
+SellID  : 84
+Qty     : 15
+Exec Px : 99.90
+Buy Px  : 99.91
+Sell Px : 99.90
+......................
+TRADE:
+Time    : 13910012923430
+TradeID : 81
+BuyID   : 116
+SellID  : 84
+Qty     : 38
+Exec Px : 99.90
+Buy Px  : 99.92
+Sell Px : 99.90
+......................
+TRADE:
+Time    : 13910012929202
+TradeID : 82
+BuyID   : 117
+SellID  : 84
+Qty     : 2
+Exec Px : 99.90
+Buy Px  : 99.92
+Sell Px : 99.90
+......................
+TRADE:
+Time    : 13910012940512
+TradeID : 83
+BuyID   : 117
+SellID  : 108
+Qty     : 76
+Exec Px : 99.90
+Buy Px  : 99.92
+Sell Px : 99.90
+......................
+TRADE:
+Time    : 13910012977068
+TradeID : 84
+BuyID   : 118
+SellID  : 108
+Qty     : 10
+Exec Px : 99.90
+Buy Px  : 99.93
+Sell Px : 99.90
+......................
+TRADE:
+Time    : 13910012994644
+TradeID : 85
+BuyID   : 120
+SellID  : 119
+Qty     : 29
+Exec Px : 99.94
+Buy Px  : 99.96
+Sell Px : 99.94
+......................
+TRADE:
+Time    : 13910013000364
+TradeID : 86
+BuyID   : 123
+SellID  : 124
+Qty     : 11
+Exec Px : 99.93
+Buy Px  : 99.94
+Sell Px : 99.93
+......................
+TRADE:
+Time    : 13910013010036
+TradeID : 87
+BuyID   : 123
+SellID  : 119
+Qty     : 41
+Exec Px : 99.94
+Buy Px  : 99.94
+Sell Px : 99.94
+......................
+TRADE:
+Time    : 13910013022750
+TradeID : 88
+BuyID   : 128
+SellID  : 121
+Qty     : 5
+Exec Px : 99.96
+Buy Px  : 99.96
+Sell Px : 99.96
+......................
+
+================== zORDER BOOK ==================
+
+Best Bid : 99.80
+Best Ask : 99.96
+Spread   : 0.16
+
+=================================================
+
+--------------- BIDS ----------------
+
+Price : 99.80    Total Qty : 59     Orders : 1
+ID         QTY        SIDE      
+99         59         BID       
+
+Price : 99.82    Total Qty : 83     Orders : 1
+ID         QTY        SIDE      
+97         83         BID       
+
+Price : 99.83    Total Qty : 52     Orders : 1
+ID         QTY        SIDE      
+101        52         BID       
+
+Price : 99.84    Total Qty : 104     Orders : 2
+ID         QTY        SIDE      
+95         8          BID       
+96         96         BID       
+
+Price : 99.93    Total Qty : 153     Orders : 2
+ID         QTY        SIDE      
+118        66         BID       
+125        87         BID       
+
+Price : 99.94    Total Qty : 23     Orders : 1
+ID         QTY        SIDE      
+123        23         BID       
+
+Price : 99.95    Total Qty : 28     Orders : 1
+ID         QTY        SIDE      
+126        28         BID       
+
+
+--------------- ASKS ----------------
+
+Price : 99.96    Total Qty : 166     Orders : 3
+ID         QTY        SIDE      
+121        51         BID       
+122        29         BID       
+127        86         BID       
+
+=================================================
+
+Arena: 1572864 / 3145728
+
+
+=== zOrder Book Closed ===
+
+
+=== Session Closed ===
+

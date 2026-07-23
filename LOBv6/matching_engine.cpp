@@ -79,8 +79,8 @@ void MatchingEngine::submit_order (Order* order) {
 
 
 // debuggin only
-// void MatchingEngine::print_book() const noexcept {
-//
-//     book_.print_book();
-// }
+void MatchingEngine::print_book() const noexcept {
+
+    book_.print_book();
+}
 
