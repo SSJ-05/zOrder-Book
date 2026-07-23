@@ -46,7 +46,7 @@ int main () {
     }
 
 
-    // engine.print_book();     // for debugging only
+    engine.print_book();     // for debugging only
 
     // arena.reset();   // for multiple sessions only
 
