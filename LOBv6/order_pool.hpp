@@ -71,13 +71,14 @@ public:
     }
 
 
+    // allocation policy - reverse next fit
+    // scan in reverse order, update next fit for next iteration
     [[ nodiscard ]]
     Order* acquire() noexcept {
 
-        // for (std::size_t i{}; i < NUM_WORDS_; ++i) {
         for (std::size_t i {NUM_WORDS_}; i-- > 0;) {
 
-            std::size_t   word_idx = (hint_word_ + i) & (NUM_WORDS_ - 1);  // wrap around logic
+            std::size_t   word_idx = (hint_word_ - i) & (NUM_WORDS_ - 1);  // wrap around logic
             std::uint64_t word     = bitmap_[ word_idx ];   // word: 64-bit bitmap value
 
             if (word == 0) continue;
@@ -87,8 +88,8 @@ public:
 
             hint_word_  =  word_idx;    // update hint for next iteration
 
-            const std::size_t slot = word_idx * BITS_PER_WORD_ + bit;
-            // const std::size_t slot = (word_idx << BITS_PER_WORD_) | bit;
+            // const std::size_t slot = word_idx * BITS_PER_WORD_ + bit;
+            const std::size_t slot = (word_idx << WORD_SHIFT_) | bit;
             
             return new ( &base_[ slot ] ) Order{};
             // placement new, bcoz allocate_array returns raw memory

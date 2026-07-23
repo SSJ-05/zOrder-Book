@@ -20,7 +20,7 @@
 
 constexpr std::size_t  ARENA_CAPACITY  { 1 << 15 };
 constexpr std::size_t  MAX_ORDERS      { 2 * ARENA_CAPACITY };
-constexpr std::size_t  NUM_TRADES      { 1 << 7 };
+constexpr std::size_t  NUM_TRADES      { 1 << 10 };
 
 
 
@@ -50,8 +50,10 @@ int main () {
 
     // arena.reset();   // for multiple sessions only
 
-    std::printf ("Arena: %zu / %zu\n", 
-                arena.used(), arena.capacity());
+    std::printf ("Arena Stats:\n"
+		    "\tused     : %zu\n"
+		    "\tcapacity : %zu\n",
+                arena.used() >> 10, arena.capacity() >> 10);
 
     std::printf ("\n\n=== zOrder Book Closed ===\n");
     std::printf ("\n\n=== Session Closed ===\n\n");
