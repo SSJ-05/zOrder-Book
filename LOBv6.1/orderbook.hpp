@@ -62,6 +62,9 @@ public:
     // copy order -> cancel_order -> change price,qty -> add_order
     Order*  modify_order (OrderID, Price, Qty);
 
+    [[ nodiscard ]]
+    std::size_t size() const noexcept;
+    
     void print_book() const noexcept;
 
 };

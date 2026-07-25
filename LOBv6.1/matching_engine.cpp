@@ -32,16 +32,24 @@ OrderPool
 
 void MatchingEngine::submit_order (Order* order) {
 
+    ++submitted_;
+
     MatchResult result;
     book_.add_order( order );
 
 
-    while ( book_.match_order( result ) ) {
+    while ( true ) {
 
-    	result.released_count  =  0;
+    	// result.released_count  =  0;
+	result = {};
+
+	if ( !book_.match_order( result ) ) break;
+
 	assert( result.released_count <= 2 );
+
         result.trade.timestamp_tsc =  __rdtsc();
         result.trade.trade_id      =  next_trade_id_++;
+
 
         // std::printf ("TRADE:\n" 
         //         "Time    : %" PRIu64 "\n"
@@ -68,19 +76,47 @@ void MatchingEngine::submit_order (Order* order) {
 	// for (auto i {}; i < result.released_count; ++i) {
 	for (auto i {result.released_count}; i-- > 0;) {
 		
+		++released_;
 		pool_.release( result.released [i] );
 	}
+	fully_matched_ += result.released_count;
 
-	if (book_.cancel_order( order->id ))
-		pool_.release( order );
+	if (Order* o = book_.cancel_order( order->id )) {
+		++cancelled_;
+		++released_;
+		pool_.release( o );
+	}
 
 	assert( !order->inlist );
 	assert( order->next == nullptr );
 	assert( order->prev == nullptr );
-    }
 
+    }	// while(true)
+	
 }
 
+
+
+
+std::size_t MatchingEngine::book_size() const noexcept {
+	
+	return book_.size();
+}
+
+
+
+void MatchingEngine::print_stats() const noexcept {
+
+    std::printf(
+        "Submitted     : %zu\n"
+        "Fully matched : %zu\n"
+        "Released      : %zu\n"
+        "Cancelled     : %zu\n",
+        submitted_,
+        fully_matched_,
+        released_,
+        cancelled_);
+}
 
 // debuggin only
 void MatchingEngine::print_book() const noexcept {

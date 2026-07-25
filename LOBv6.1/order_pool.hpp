@@ -60,6 +60,11 @@ private:
                                 // avoids starting iteration from 0 again
                                 // use in acquire()
 
+    // counters
+    std::size_t  acquire_count_  {};
+    std::size_t  release_count_  {};
+    std::size_t  live_orders_    {};
+
 
 public:
     explicit OrderPool( Arena& arena )
@@ -90,11 +95,18 @@ public:
 
             // const std::size_t slot = word_idx * BITS_PER_WORD_ + bit;
             const std::size_t slot = (word_idx << WORD_SHIFT_) | bit;
+
+	    ++acquire_count_;
+	    ++live_orders_;
+	    assert( live_orders_ <= CAPACITY_ );
             
             return new ( &base_[ slot ] ) Order{};
             // placement new, bcoz allocate_array returns raw memory
             // construct order before returning
         }
+
+
+	print_stats();	// debugging
 
         assert( false && "OrderPool exhausted\n" );
         return nullptr;     // out of memory
@@ -103,7 +115,10 @@ public:
 
     void release( Order* order ) noexcept {
 	
-	
+	++release_count_;
+	assert( live_orders_ > 0 );
+	--live_orders_;
+
         assert( order != nullptr );
         assert( order >= base_ );
         assert( order < base_ + CAPACITY_ );
@@ -121,6 +136,16 @@ public:
 
         // 4. mark the bit free
         bitmap_[ word ]  |=  ( 1ULL << bit );
+    }
+
+
+    // print stats
+    void print_stats() const noexcept {
+    
+	std::printf("\n=== ORDER POOL ===\n");
+	std::printf("Acquire : %zu\n", acquire_count_);
+    	std::printf("Release : %zu\n", release_count_);
+	std::printf("Live    : %zu\n", live_orders_);
     }
 
 };

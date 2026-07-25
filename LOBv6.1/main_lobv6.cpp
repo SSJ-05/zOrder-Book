@@ -20,7 +20,7 @@
 
 
 constexpr std::size_t  ARENA_CAPACITY  { 1 << 20 };
-constexpr std::size_t  NUM_TRADES      { 1 << 20 };
+constexpr std::size_t  NUM_TRADES      { 1 << 10 };
 
 
 
@@ -47,7 +47,8 @@ int main () {
 
 
 
-    for (auto _ {NUM_TRADES}; _-- > 0;) {
+    // for (auto _ {NUM_TRADES}; _-- > 0;) {
+    for (auto i {0uz}; i < NUM_TRADES; ++i) {
         
         Order* order = pool.acquire();
 	assert( !order->inlist );
@@ -56,6 +57,11 @@ int main () {
 
         gen.next( order );
         engine.submit_order( order );
+
+	if ( (i+1) % 100 == 0 ) {
+		std::printf( "Processed : %zu\n", i+1 );
+		std::printf( "Book size : %zu\n", engine.book_size() );
+	}
     }
 
 
@@ -67,6 +73,9 @@ int main () {
     //   "\tused     : %zu\n"
     //   "\tcapacity : %zu\n",
     //             arena.used() >> 10, arena.capacity() >> 10);
+
+    pool.print_stats();
+    engine.print_stats();
 
     std::printf ("\n\n=== zOrder Book Closed ===\n");
     std::printf ("\n\n=== Session Closed ===\n\n");

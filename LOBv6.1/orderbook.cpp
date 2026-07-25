@@ -23,7 +23,9 @@ void Orderbook::add_order (Order* order) {
             order->id, 
             OrderLocation { order }
         );
+    
 }
+
 
 
 Order*  Orderbook::cancel_order (OrderID id) {
@@ -107,15 +109,24 @@ bool Orderbook::match_order ( MatchResult& result ) {
         bids_.remove( bid );
 
 	result.released [ result.released_count++ ] = bid;  // set the status for release
+
     }
     if ( ask->qty == 0 ) {
         order_map_.erase( ask->id );
         asks_.remove( ask );
 
 	result.released [ result.released_count++ ] = ask;
+
     }
 
     return true;
+}
+
+
+
+std::size_t Orderbook::size() const noexcept {
+	
+	return order_map_.size();
 }
 
 
