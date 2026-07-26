@@ -22,10 +22,7 @@ struct ListNode {
     ListNode*  prev  { nullptr };
     ListNode*  next  { nullptr };
 
-#ifndef NDEBUG
     bool  inlist {};  // flag to avoid double entry of same order
-#endif
-
 };
 
 
