@@ -83,3 +83,14 @@ Orderbook
 1. Long-duration randomized stress tests (>1M submissions) reveal a gradual divergence between OrderPool::live_orders() and OrderBook::size(), eventually exhausting the fixed-capacity pool. 
 2. Ownership invariants are correct for smaller workloads, and a major lifecycle bug in matched-order release was fixed during V6.1. 
 3. The remaining long-run divergence will be re-evaluated after the V7 replacement of std::unordered_map with a custom flat hash map.
+
+
+V6.1 - Stable ownership model
+
+- Fixed matched-order release lifecycle
+- Added pool/book ownership instrumentation
+- Added ladder range assertions
+- Validated Acquire - Release == Live
+- Validated Live == Book size
+- Stress-tested to 4,000,000 submissions
+- Deferred sliding price window to V7
