@@ -34,8 +34,8 @@ void IntrusiveList::push_back (Order* order) {
 
     assert (head_.next != nullptr);
     assert (tail_.prev != nullptr);
-    assert (head_.next != order);
-    assert (tail_.prev != order);
+    // assert (head_.next != order);
+    // assert (tail_.prev != order);
 
 
     // assumes tail.prev exists after ctor
@@ -64,7 +64,7 @@ void IntrusiveList::erase (Order* order) {
     assert (order->next != nullptr);
 
     // case 1: empty list
-    if (empty()) return;
+    assert ( !empty() );
 
     // rewire
     order->prev->next = order->next;
@@ -89,8 +89,6 @@ void IntrusiveList::pop_front () {
     assert (!empty());
 
     erase( static_cast<Order*>( head_.next ) );
-
-    --size_;
 }
 
 
@@ -103,8 +101,11 @@ void IntrusiveList::validate() const {
     assert (head_.next != nullptr);
     assert (tail_.prev != nullptr);
 
-    if (empty())
+    if (empty()) {
         assert (head_.next == &tail_);
+	assert( tail.prev == &head );
+	size_ = 0;
+    }
 }
 #endif
 
@@ -150,10 +151,12 @@ Order* IntrusiveList::next ( Order* p ) const noexcept {
 // remove nodes b/w head and tail
 void IntrusiveList::clear() noexcept {
 
+    assert( empty() );
+
     // link head to tail and vice versa
     head_.next = &tail_;
     tail_.prev = &head_;
 
     // reset size of list
-    size_     = 0;
+    size_  =  0;
 }
