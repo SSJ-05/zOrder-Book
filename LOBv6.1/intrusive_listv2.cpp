@@ -103,8 +103,7 @@ void IntrusiveList::validate() const {
 
     if (empty()) {
         assert (head_.next == &tail_);
-	assert( tail.prev == &head );
-	size_ = 0;
+	assert( tail_.prev == &head_ );
     }
 }
 #endif

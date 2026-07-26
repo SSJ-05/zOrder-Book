@@ -22,7 +22,8 @@ public:
     OrderGenerator() :
         id_ (0),
         mid_price_ (10000),
-        rng_ (std::random_device {} ()),
+        // rng_ (std::random_device {} ()),
+        rng_ ( 42 ),
         price_dist_ (-2, 2),
         qty_dist_ (1, 100),
         side_dist_ (0.5) {}

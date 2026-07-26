@@ -8,7 +8,7 @@
 
 #include <cstdio>
 #include <algorithm>
-
+#include <cassert>
 
 
 void Orderbook::add_order (Order* order) {
@@ -19,10 +19,12 @@ void Orderbook::add_order (Order* order) {
         asks_.add( order );
         
 
-    order_map_.emplace (
+    auto [ it, inserted ] = 
+    	order_map_.emplace (
             order->id, 
             OrderLocation { order }
         );
+    assert( inserted );		// make sure emplace succeeded
     
 }
 

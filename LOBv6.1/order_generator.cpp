@@ -3,7 +3,7 @@
 #include "orderv2.hpp"
 #include "order_generator.hpp"
 
-// #include <algorithm>    // for std::clamp
+#include <algorithm>    // for std::clamp
 
 
 void OrderGenerator::next( Order* order ) {
@@ -12,9 +12,9 @@ void OrderGenerator::next( Order* order ) {
 
     mid_price_ += price_dist_(rng_);
 
-    // // optional clamp for keeping prices centered
-    // mid_price_ = std::clamp (
-    //         mid_price_, Price {9900}, Price {10100} );
+    // optional clamp for keeping prices centered
+    mid_price_ = std::clamp (
+            mid_price_, Price {9000}, Price {13995} );
 
     order->price = mid_price_;
     

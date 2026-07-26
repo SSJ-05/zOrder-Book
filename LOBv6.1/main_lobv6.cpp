@@ -20,7 +20,7 @@
 
 
 constexpr std::size_t  ARENA_CAPACITY  { 1 << 20 };
-constexpr std::size_t  NUM_TRADES      { 1 << 10 };
+constexpr std::size_t  NUM_TRADES      { 40'00'000 };
 
 
 
@@ -51,6 +51,7 @@ int main () {
     for (auto i {0uz}; i < NUM_TRADES; ++i) {
         
         Order* order = pool.acquire();
+
 	assert( !order->inlist );
 	assert( order->next == nullptr );
 	assert( order->prev == nullptr );
@@ -58,10 +59,21 @@ int main () {
         gen.next( order );
         engine.submit_order( order );
 
-	if ( (i+1) % 100 == 0 ) {
+	if ( (i+1) % 10'00'000 == 0 ) {
 		std::printf( "Processed : %zu\n", i+1 );
 		std::printf( "Book size : %zu\n", engine.book_size() );
+		assert( pool.live_orders() == engine.book_size() );
 	}
+
+	// if ((i + 1) % 1000 == 0) {
+	//    		if ( pool.live_orders() != engine.book_size() ) {
+	// 		std::printf( "Invariant broken at iteration %zu\n", i + 1);
+	// 		std::printf( "Pool live : %zu\n", pool.live_orders());
+	// 		std::printf( "Book size : %zu\n", engine.book_size());
+	//        		assert( false );
+	//    		}
+	// }
+	
     }
 
 

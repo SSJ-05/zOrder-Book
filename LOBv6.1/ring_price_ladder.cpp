@@ -6,6 +6,7 @@
 #include "ring_price_ladder.hpp"
 
 #include <cassert>
+#include <cstdio>
 
 
 // helper func to calculate index
@@ -45,8 +46,11 @@ const PriceLevel&  RingPriceLadder::at_level (Price p) const noexcept {
 
 void RingPriceLadder::add (Order* order) noexcept {
     
-    if ( !contains( order->price ) ) return;
+    if ( !contains( order->price ) ) {
+	std::printf( "OUT OF RANGE : %u\n", order->price );
+	assert( false );
         // advance_window( order->price );
+    }
 
     PriceLevel& lvl = at_level( order->price );
         
@@ -96,7 +100,7 @@ void RingPriceLadder::update_best_after_remove (Price removed_price) noexcept {
 
     // bid
     if (side_ == Side::Bid) {
-        for (auto idx {0uz}; idx < best_idx_; ++idx) {
+        for (auto idx {best_idx_}; idx-- > 0;) {  // backward scan - for higher bid
             if ( !rpl_[idx].orders.empty() ) {
                 best_idx_ = idx;
                 return;
@@ -151,6 +155,7 @@ void  RingPriceLadder::clear_level (Price new_price) noexcept {
     lvl.price          =  new_price;
     lvl.total_qty      =  0;
 
+    assert( lvl.orders.empty() );
     lvl.orders.clear();
 }
 
