@@ -81,15 +81,17 @@ public:
     [[ nodiscard ]]
     Order* acquire() noexcept {
 
-        for (std::size_t i {NUM_WORDS_}; i-- > 0;) {
+        // for (std::size_t i {NUM_WORDS_}; i-- > 0;) {
+	for (auto i {0uz}; i < NUM_WORDS_; ++i) {
 
-            std::size_t   word_idx = (hint_word_ - i) & (NUM_WORDS_ - 1);  // wrap around logic
+            std::size_t   word_idx = (hint_word_ + i) & (NUM_WORDS_ - 1);  // wrap around logic
             std::uint64_t word     = bitmap_[ word_idx ];   // word: 64-bit bitmap value
 
             if (word == 0) continue;
 
             unsigned bit  =  __builtin_ctzll( word );
             bitmap_[ word_idx ]  &=  ~( 1ULL << bit );
+	    assert( (bitmap_[ word_idx ] & ( 1ULL << bit )) == 0 );
 
             hint_word_  =  word_idx;    // update hint for next iteration
 
@@ -135,9 +137,15 @@ public:
         const std::size_t bit   =  slot & (BITS_PER_WORD_ - 1);
 
         // 4. mark the bit free
+	assert( (bitmap_[ word ] & ( 1ULL << bit )) == 0 );
         bitmap_[ word ]  |=  ( 1ULL << bit );
     }
 
+
+    std::size_t live_orders() const noexcept {
+	
+	return live_orders_;
+    }
 
     // print stats
     void print_stats() const noexcept {
