@@ -59,8 +59,7 @@ public:
 
 		auto idx  =  key & MASK;	// current bucket/idx
 
-		for (auto i {0uz}; i < Capacity; ++i) {
-		// for (auto _ {Capacity}; _-- > 0;) {
+		for (auto _ {Capacity}; _-- > 0;) {
 		
 			Entry& slot  =  entries_ [ idx ];
 
@@ -77,7 +76,7 @@ public:
 
 			// if duplicate key
 			if ( slot.state == State::Occupied &&
-			     slot.key == key ) 
+			     slot.key   == key ) 
 				return false;
 
 			idx  =  (idx + 1) & MASK;	// advance bucket/idx
@@ -92,7 +91,8 @@ public:
 		
 		auto idx  =  key & MASK;
 
-		for (auto i {0uz}; i < Capacity; ++i) {
+		// for (auto i {0uz}; i < Capacity; ++i) {
+		for (auto _ {Capacity}; _-- > 0;) {
 			
 			Entry& slot = entries_ [ idx ];
 
@@ -137,7 +137,8 @@ public:
 		
 		auto idx  =  key & MASK;
 
-		for (auto i {0uz}; i < Capacity; ++i) {
+		// for (auto i {0uz}; i < Capacity; ++i) {
+		for (auto _ {Capacity}; _-- > 0;) {
 			
 			Entry& slot = entries_ [ idx ];
 
@@ -164,7 +165,6 @@ public:
 
 
 
-	[[ nodiscard ]]
 	void  clear () {
 		
 		for (auto& entry : entries_) { 

@@ -8,8 +8,7 @@
 #include "price_level.hpp"
 #include "intrusive_listv2.hpp"
 #include "ring_price_ladder.hpp"
-
-#include <unordered_map>
+#include "flat_map_v1.hpp"
 
 
 // helps in identifying Price Level to be modified
@@ -41,7 +40,10 @@ private:
     RingPriceLadder asks_;
 
     // order map to cancel/modify in O(1)
-    std::unordered_map <OrderID, OrderLocation> order_map_;
+    // std::unordered_map <OrderID, OrderLocation> order_map_;
+
+    static constexpr std::size_t  CAPACITY_  { 1 << 20 };
+    zerok::FlatMap <OrderID, OrderLocation, CAPACITY_> order_map_;
     // ***benchmark before replacing std::unordered_map with flat_map
 
 
