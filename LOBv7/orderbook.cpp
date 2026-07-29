@@ -19,13 +19,12 @@ void Orderbook::add_order (Order* order) {
         asks_.add( order );
         
 
-    auto [ it, inserted ] = 
-    	order_map_.emplace (
+    bool inserted = 
+    	order_map_.insert (
             order->id, 
             OrderLocation { order }
         );
-    assert( inserted );		// make sure emplace succeeded
-    
+    assert( inserted );		// make sure insert succeeds
 }
 
 
@@ -33,18 +32,17 @@ void Orderbook::add_order (Order* order) {
 Order*  Orderbook::cancel_order (OrderID id) {
 
     // lookup order in hashmap
-    auto pos = order_map_.find( id );
-    if ( pos == order_map_.end() ) 
-        return nullptr;
+    auto* pos = order_map_.find( id );
+    if ( !pos ) return nullptr;
 
-    Order* order = pos->second.order;   // cache the ptr before remove
+    Order* order = pos->order;   // cache the ptr before remove
 
     if ( order->side == Side::Bid )
         bids_.remove( order );
     else
         asks_.remove( order );
 
-    order_map_.erase( pos );    // erase hash entry O(1)
+    order_map_.erase( id );    
 
     return order;
 }
@@ -55,11 +53,10 @@ Order*  Orderbook::modify_order ( OrderID id,
                                   Price new_price, 
                         	  Qty new_qty ) {
 
-    auto pos = order_map_.find( id );
-    if ( pos == order_map_.end() ) 
-        return nullptr;
+    OrderLocation* loc = order_map_.find( id );
+    if ( !loc ) return nullptr;
 
-    Order* order = pos->second.order;
+    Order* order = loc->order;
 
     cancel_order( id );
 
