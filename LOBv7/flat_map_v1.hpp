@@ -6,6 +6,9 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <vector>
+// #include <memory>
+
 
 namespace zerok {
 
@@ -38,12 +41,19 @@ private:
 		State  state  { State::Empty };
 	};
 
-	Entry entries_ [ Capacity ];
+	// Entry entries_ [ Capacity ];
+	// std::unique_ptr<Entry[]> entries_; 
+	std::vector<Entry> entries_;
 
 	std::size_t  size_  {};
 
+	std::size_t  deleted_ {};	// debugging only
 
 public:
+
+	FlatMap() : entries_( Capacity ) {}
+	// FlatMap() : 
+		// entries_( std::make_unique<Entry[]>(Capacity) ) {}
 
 	// bool	     insert ( const Key&, const Value& );
 	// Value*       find ( const Key& );
@@ -62,6 +72,8 @@ public:
 		for (auto _ {Capacity}; _-- > 0;) {
 		
 			Entry& slot  =  entries_ [ idx ];
+
+			if ( slot.state == State::Deleted ) --deleted_;
 
 			if ( slot.state == State::Empty ||
 			     slot.state == State::Deleted ) {
@@ -154,6 +166,7 @@ public:
 
 				--size_;
 
+			++deleted_;
 				return true;
 			}
 
@@ -187,6 +200,10 @@ public:
 		
 		return size_;
 	}
+
+
+	std::size_t deleted () { return deleted_; }
+
 };
 
 } // namespace zerok

@@ -20,7 +20,7 @@
 
 
 constexpr std::size_t  ARENA_CAPACITY  { 1 << 20 };
-constexpr std::size_t  NUM_TRADES      { 40'00'000 };
+constexpr std::size_t  NUM_TRADES      { 10'00'000 };
 
 
 
@@ -59,7 +59,7 @@ int main () {
         gen.next( order );
         engine.submit_order( order );
 
-	if ( (i+1) % 10'00'000 == 0 ) {
+	if ( (i+1) % 500'000 == 0 ) {
 		std::printf( "Processed : %zu\n", i+1 );
 		std::printf( "Book size : %zu\n", engine.book_size() );
 		assert( pool.live_orders() == engine.book_size() );

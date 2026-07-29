@@ -25,6 +25,7 @@ void Orderbook::add_order (Order* order) {
             OrderLocation { order }
         );
     assert( inserted );		// make sure insert succeeds
+    assert( order_map_.size() == size() );
 }
 
 
@@ -44,6 +45,7 @@ Order*  Orderbook::cancel_order (OrderID id) {
 
     order_map_.erase( id );    
 
+    assert( order_map_.size() == size() );
     return order;
 }
 
@@ -118,6 +120,7 @@ bool Orderbook::match_order ( MatchResult& result ) {
 
     }
 
+    assert( order_map_.size() == size() );
     return true;
 }
 
@@ -129,6 +132,10 @@ std::size_t Orderbook::size() const noexcept {
 }
 
 
+std::size_t Orderbook::deleted_count() {
+	
+	return order_map_.deleted();
+}
 
 void Orderbook::print_book() const noexcept {
 

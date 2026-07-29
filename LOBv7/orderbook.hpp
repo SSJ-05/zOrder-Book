@@ -69,5 +69,7 @@ public:
     
     void print_book() const noexcept;
 
+    std::size_t deleted_count();
+
 };
 
