@@ -62,7 +62,7 @@ private:
 
 public:
 
-	FlatMap() : entries_( Capacity ) {}
+	FlatMap() : entries_( Capacity ), ctrl_( Capacity ) {}
 	// FlatMap() : entries_( std::make_unique<Entry[]>(Capacity) ) {}
 
 	// bool	     insert ( const Key&, const Value& );
@@ -82,7 +82,7 @@ public:
 		for (auto _ {Capacity}; _-- > 0;) {
 			
 			Entry& slot  =  entries_[ idx ];
-			auto& state  =  ctrl_[ idx ]
+			auto& state  =  ctrl_[ idx ];
 
 			if ( state == EMPTY ) {
 
@@ -165,16 +165,13 @@ public:
 			Entry& slot = entries_ [ idx ];
 			auto& state  = ctrl_[ idx ];
 
-			if ( state == EMPTY )
-				return false;
-			
 			if ( state == FULL &&
 			     slot.key == key ) {
 
 				// found the target. erase it
 				slot  = {};
 				state = EMPTY;	// mark the slot - hole 
-				--size;
+				--size_;
 
 				// now backfill the hole
 				auto hole = idx;
@@ -200,22 +197,23 @@ public:
 					// if ideal == next, at ideal pos - dont move
 					// else, check if hole is b/w ideal pos and 
 					// current pos/next
+					/************************************************/
 					bool hole_in_path { false };
 					if ( ideal <= next ) 
-						hole_in_path = 
-							ideal <= hole && hole < next;
+						hole_in_path = ideal <= hole && 
+								hole < next;
 					else
-						hole_in_path =
-							ideal <= hole || hole < next;
-
+						hole_in_path = ideal <= hole ||
+								hole < next;
 
 					if ( !hole_in_path ) break;
+					/************************************************/
+
 
 					// move next_slot into hole
 					entries_[ hole ]  =  next_slot;
 					ctrl_[ hole ]     =  FULL;
 					ctrl_[ next ]     =  EMPTY;
-					next_slot = {};
 
 					hole  =  next;
 					next  =  (next + 1) & MASK;
