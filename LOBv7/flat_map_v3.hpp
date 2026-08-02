@@ -49,15 +49,15 @@ private:
 	static constexpr std::size_t  MASK  { Capacity - 1 };
 
 	// states for control-byte meta data
-	static constexpr std::uint8_t EMPTY  { 0 };
-	static constexpr std::uint8_t FULL   { 1 };
+	static constexpr std::uint8_t  EMPTY  { 0 };
+	static constexpr std::uint8_t  FULL   { 1 };
 
 	static_assert( Capacity > 0 && 
 		      (Capacity & (Capacity - 1)) == 0,
 		      "Capacity must be power of 2.\n" );
 
-	static_assert( std::is_trivially_destructible_v<Key> );
-	static_assert( std::is_trivially_destructible_v<Value> );
+	static_assert( std::is_trivially_copyable_v<Key> );
+	static_assert( std::is_trivially_copyable_v<Value> );
 
 
 	// State enum removed - now in ctrl_
@@ -76,8 +76,6 @@ private:
 
 	[[ maybe_unused ]] char pad_ [ 64 ];
 	alignas(64) std::size_t  size_  {};
-
-	std::size_t  deleted_ {};	// debugging only
 
 
 public:
@@ -104,7 +102,6 @@ public:
 			
 			Entry& slot  =  entries_[ idx ];
 			auto& state  =  ctrl_[ idx ];
-
 
 			// avoid duplicate entry
 			if ( state == FULL && 
@@ -153,7 +150,7 @@ public:
 		for (auto _ {Capacity}; _-- > 0;) {
 			
 			Entry& slot = entries_[ idx ];
-			auto& state  = ctrl_[ idx ];
+			auto state  = ctrl_[ idx ];
 
 			if ( state == EMPTY ) 
 				return nullptr;
@@ -195,7 +192,7 @@ public:
 	[[ nodiscard ]]
 	bool  erase ( const Key& key ) {
 		
-		auto idx  =  key & MASK;
+		std::size_t idx  =  key & MASK;
 
 		for (auto _ {Capacity}; _-- > 0;) {
 			
@@ -222,33 +219,23 @@ public:
 				while ( ctrl_[ next ] == FULL ) {
 
 					Entry& next_slot  =  entries_[ next ];
-					auto& next_state  =  ctrl_[ next ];
-
-					if ( next_state == EMPTY )
-						break;	// empty slot
-							// stop shifting
 
 					// ideal - natural pos of key, if 
 					// there were no collisions
-					auto ideal = next_slot.key & MASK;
+					auto ideal  =  next_slot.key & MASK;
+				
+					// **Robinhood invariant
+					// after shifting, displacment must not...
+					// ...exceed threshold
+					// check if hole is in probe path and disp is...
+					// ...below threshold
+					auto dist   =  (next - ideal) & MASK;
 
-					// check if element can shift backward
-					// if ideal == next, at ideal pos - dont move
-					// else, check if hole is b/w ideal pos and 
-					// current pos/next
-					/************************************************/
-					bool hole_in_path { false };
-					if ( ideal <= next ) 
-						hole_in_path = ideal <= hole && 
-								hole < next;
-					else
-						hole_in_path = ideal <= hole ||
-								hole < next;
-
-					if ( !hole_in_path ) break;
+					// if ele at ideal pos - stop shifting
+					if ( dist == 0 ) break;
 					/************************************************/
 
-
+					// shift backward
 					// move next_slot into hole
 					entries_[ hole ]  =  next_slot;
 					ctrl_[ hole ]     =  FULL;
@@ -275,6 +262,10 @@ public:
 			entry = {};
 		}
 
+		std::fill( ctrl_.begin(),
+			   ctrl_.end(),
+			   EMPTY );
+
 		size_  =  0;
 	}
 
@@ -291,9 +282,6 @@ public:
 		
 		return size_;
 	}
-
-
-	std::size_t deleted () { return deleted_; }
 
 };
 
