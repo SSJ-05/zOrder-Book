@@ -1,4 +1,4 @@
-// flat map // 30.07.26 // ZeroK
+// flat map v2 // 31.07.26 // ZeroK
 /* Features:
  * control-byte meta data: stores the state of the spot for fast probing
  * eg: std::vector<char> ctrl_ - stores meta data
@@ -23,8 +23,8 @@
 namespace zerok {
 
 template <
-	typename Key,
-	typename Value,
+	typename Key,		// need to be trivial
+	typename Value,		// static_assert ahead
 	std::size_t Capacity
 >
 class FlatMap {
@@ -32,13 +32,17 @@ class FlatMap {
 private:
 
 	static constexpr std::size_t  MASK  { Capacity - 1 };
-	static constexpr std::uint8_t EMPTY { 0 };
-	static constexpr std::uint8_t FULL  { 1 };
+
+	// states for control-byte meta data
+	static constexpr std::uint8_t EMPTY  { 0 };
+	static constexpr std::uint8_t FULL   { 1 };
 
 	static_assert( Capacity > 0 && 
 		      (Capacity & (Capacity - 1)) == 0,
 		      "Capacity must be power of 2.\n" );
 
+	static_assert( std::is_trivially_destructible_v<Key> );
+	static_assert( std::is_trivially_destructible_v<Value> );
 
 
 	// State enum removed - now in ctrl_
@@ -55,7 +59,8 @@ private:
 	// control-byte meta data
 	std::vector<std::uint8_t> ctrl_;
 
-	std::size_t  size_  {};
+	[[ maybe_unused ]] char pad_ [ 64 ];
+	alignas(64) std::size_t  size_  {};
 
 	std::size_t  deleted_ {};	// debugging only
 
@@ -86,10 +91,10 @@ public:
 
 			if ( state == EMPTY ) {
 
-				slot.key     =  key;
-				slot.value   =  value;
+				slot.key    =  key;
+				slot.value  =  value;
 
-				state =  FULL;
+				state  =  FULL;
 				++size_;
 				return true;
 			}
@@ -169,7 +174,9 @@ public:
 			     slot.key == key ) {
 
 				// found the target. erase it
-				slot  = {};
+				// update meta data - no need to erase payload
+				// payload will be overwritten during insert()
+				// slot  = {};
 				state = EMPTY;	// mark the slot - hole 
 				--size_;
 
@@ -182,8 +189,8 @@ public:
 				// or ideal pos comes
 				while ( ctrl_[ next ] == FULL ) {
 
-					Entry& next_slot  = entries_[ next ];
-					auto& next_state  = ctrl_[ next ];
+					Entry& next_slot  =  entries_[ next ];
+					auto& next_state  =  ctrl_[ next ];
 
 					if ( next_state == EMPTY )
 						break;	// empty slot
