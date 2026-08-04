@@ -52,8 +52,7 @@ private:
 public:
 
 	FlatMap() : entries_( Capacity ) {}
-	// FlatMap() : 
-		// entries_( std::make_unique<Entry[]>(Capacity) ) {}
+	// FlatMap() : entries_( std::make_unique<Entry[]>(Capacity) ) {}
 
 	// bool	     insert ( const Key&, const Value& );
 	// Value*       find ( const Key& );

@@ -32,6 +32,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <vector>
+#include <algorithm>
 // #include <memory>
 
 
@@ -46,7 +47,7 @@ class FlatMap {
 
 private:
 
-	static constexpr std::size_t  MASK  { Capacity - 1 };
+	static constexpr std::size_t   MASK   { Capacity - 1 };
 
 	// states for control-byte meta data
 	static constexpr std::uint8_t  EMPTY  { 0 };
@@ -127,9 +128,9 @@ public:
 			// poor/new element replaces rich/existing element
 			if ( poor_dist > rich_dist ) {
 				
-				std::swap( slot.key, key );
+				std::swap( slot.key,   key );
 				std::swap( slot.value, value );
-				std::swap( poor_dist, rich_dist );	
+				std::swap( poor_dist,  rich_dist );	
 			}
 
 			// advance idx
@@ -170,7 +171,8 @@ public:
 		
 		auto idx  =  key & MASK;
 
-		for (auto i {0uz}; i < Capacity; ++i) {
+		// for (auto i {0uz}; i < Capacity; ++i) {
+		for (auto _ {Capacity}; _-- > 0;) {
 			
 			const Entry& slot = entries_[ idx ];
 
@@ -196,8 +198,8 @@ public:
 
 		for (auto _ {Capacity}; _-- > 0;) {
 			
-			Entry& slot = entries_ [ idx ];
-			auto& state  = ctrl_[ idx ];
+			Entry& slot  =  entries_ [ idx ];
+			auto& state  =  ctrl_[ idx ];
 
 			if ( state == FULL &&
 			     slot.key == key ) {
@@ -215,7 +217,7 @@ public:
 								// to fill the hole
 
 				// keep shifting till empty slot
-				// or ideal pos comes
+				// or till ideal pos comes
 				while ( ctrl_[ next ] == FULL ) {
 
 					Entry& next_slot  =  entries_[ next ];

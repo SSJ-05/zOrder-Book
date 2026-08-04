@@ -37,5 +37,6 @@ struct Order : ListNode {
 
 };
 
-static_assert (std::is_trivially_copyable_v<Order>);
-
+static_assert( std::is_trivially_copyable_v<Order> );
+static_assert( std::is_trivially_destructible_v<Order> );
+static_assert( sizeof( Order ) <= 64, "Order must fit in a single cache line\n" );

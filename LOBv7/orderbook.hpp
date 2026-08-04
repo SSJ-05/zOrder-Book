@@ -8,7 +8,9 @@
 #include "price_level.hpp"
 #include "intrusive_listv2.hpp"
 #include "ring_price_ladder.hpp"
-#include "flat_map_v1.hpp"
+// #include "flat_map_v1.hpp"
+// #include "flat_map_v2.hpp"
+#include "flat_map_v3.hpp"
 
 
 // helps in identifying Price Level to be modified
@@ -68,8 +70,6 @@ public:
     std::size_t size() const noexcept;
     
     void print_book() const noexcept;
-
-    std::size_t deleted_count();
 
 };
 

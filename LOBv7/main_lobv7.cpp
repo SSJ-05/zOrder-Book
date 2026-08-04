@@ -20,7 +20,7 @@
 
 
 constexpr std::size_t  ARENA_CAPACITY  { 1 << 20 };
-constexpr std::size_t  NUM_TRADES      { 10'00'000 };
+constexpr std::size_t  NUM_TRADES      { 1 << 20 };
 
 
 

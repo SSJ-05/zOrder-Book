@@ -93,7 +93,7 @@ void MatchingEngine::submit_order (Order* order) {
 
     }	// while(true)
 	
-	std::printf( "Deleted Tombs : %zu\n", book_.deleted_count() );
+	// std::printf( "Deleted Tombs : %zu\n", book_.deleted_count() );
 }
 
 

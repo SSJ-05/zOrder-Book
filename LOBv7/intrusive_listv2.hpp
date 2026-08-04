@@ -1,5 +1,7 @@
 // intrusive list class// 07.07.26// ZeroK
 
+// intrusive list doesnt own the nodes, orderpool does
+
 #pragma once
 
 #include "orderv2.hpp"
@@ -37,6 +39,7 @@ public:
     std::size_t size() const noexcept;
 
     // helper func for iteration
+    [[ nodiscard ]]
     Order* next (Order* p) const noexcept;
 
     // copy and move semantics

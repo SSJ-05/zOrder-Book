@@ -132,10 +132,6 @@ std::size_t Orderbook::size() const noexcept {
 }
 
 
-std::size_t Orderbook::deleted_count() {
-	
-	return order_map_.deleted();
-}
 
 void Orderbook::print_book() const noexcept {
 

@@ -53,11 +53,11 @@ class FlatMap {
 
 private:
 
-	static constexpr std::size_t   MASK      { Capacity - 1 };
+	static constexpr std::size_t   MASK   { Capacity - 1 };
 
 	// states for control-byte meta data
-	static constexpr std::uint8_t  EMPTY     { 0x80 };
-	static constexpr std::uint8_t  GRP_SIZE  { 32 };
+	static constexpr std::uint8_t  EMPTY       { 0x80 };
+	static constexpr std::uint8_t  GROUP_SIZE  { 32 };
 
 	static_assert( Capacity > 0 && 
 		      (Capacity & (Capacity - 1)) == 0,
@@ -200,25 +200,45 @@ public:
 	[[ nodiscard ]]
 	Value*  find ( const Key& key ) {
 		
-		std::size_t idx  =  key & MASK;
-		std::uint8_t fp  =  fingerprints( key );
+		const std::size_t hash  =  key & MASK;
+		const std::uint8_t fp   =  fingerprints( key );
 
-		// for (auto i {0uz}; i < Capacity; ++i) {
-		for (auto _ {Capacity}; _-- > 0;) {
+		// align to group start
+		std::size_t group_idx  =  hash & ~(GROUP_SIZE - 1);
+
+		for (auto _ {0uz}; _ < Capacity; _ += GROUP_SIZE) {
 			
-			Entry& slot  =  entries_[ idx ];
-			auto state   =  ctrl_[ idx ];
+			// load 32 control bytes and match fingerprints
+			auto mask  =  match_group( group_idx, fp );
 
-			if ( state == EMPTY ) 
-				return nullptr;
+			while ( mask ) {
+				
+				const int offset  =  __builtin_ctz( mask );
+				const int idx     =  group_idx + offset;
 
-			if ( state == fp && slot.key == key ) 
-				return &slot.value;
+				if ( entries_[ idx ].key == key )
+					return &entries_[ idx ].value;
 
-			idx  =  (idx + 1) & MASK;
+				mask  &=  (mask - 1); 
+			}
+
+			// check if we passed any EMPTY slots
+			// need to preserve robinhood invariant
+			auto empty_mask  =  match_empty( group_idx );
+
+			if ( empty_mask ) {
+				
+				std::size_t first_empty =
+					group_idx + __builtin_ctz( empty_mask );
+
+				std::size_t last_check =
+					group_idx + GROUP_SIZE - 1;
+			}
+
+			group_idx  =  (group_idx + GROUP_SIZE) & MASK;
 
 			// prefetch entries_ (more expensive than ctrl_)
-			__builtin_prefetch( &entries_[ next_grp ],	// addr to prefetch
+			__builtin_prefetch( &entries_[ group_idx ],	// addr to prefetch
 					    0, 				// read - 0, write - 1
 					    1 );			// locality - L3 cache 
 		}
@@ -226,28 +246,28 @@ public:
 		return nullptr;
 	}	
 
-	[[ nodiscard ]]
-	const Value*  find ( const Key& key ) const {
-		
-		auto idx  =  key & MASK;
-
-		// for (auto i {0uz}; i < Capacity; ++i) {
-		for (auto _ {Capacity}; _-- > 0;) {
-			
-			const Entry& slot = entries_[ idx ];
-
-			if ( ctrl_[ idx ] == EMPTY ) 
-				return nullptr;
-
-			if ( ctrl_[ idx ] == fingerprints( key ) &&
-			     slot.key == key ) 
-				return &slot.value;
-
-			idx  =  (idx + 1) & MASK;
-		}
-
-		return nullptr;
-	}
+	// [[ nodiscard ]]
+	// const Value*  find ( const Key& key ) const {
+	//
+	// 	auto idx  =  key & MASK;
+	//
+	// 	// for (auto i {0uz}; i < Capacity; ++i) {
+	// 	for (auto _ {Capacity}; _-- > 0;) {
+	//
+	// 		const Entry& slot = entries_[ idx ];
+	//
+	// 		if ( ctrl_[ idx ] == EMPTY ) 
+	// 			return nullptr;
+	//
+	// 		if ( ctrl_[ idx ] == fingerprints( key ) &&
+	// 		     slot.key == key ) 
+	// 			return &slot.value;
+	//
+	// 		idx  =  (idx + 1) & MASK;
+	// 	}
+	//
+	// 	return nullptr;
+	// }
 
 
 

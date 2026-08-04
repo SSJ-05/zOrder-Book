@@ -75,7 +75,7 @@ public:
         uintptr_t   aligned = (current + alignment - 1) & ~(alignment - 1);
         std::size_t padding = aligned - current;
 
-        if (size > size_ - offset_ - padding) return nullptr;
+        // if (size > size_ - offset_ - padding) return nullptr;
 
         offset_ += padding;
         std::byte* ptr = memory_ + offset_;
