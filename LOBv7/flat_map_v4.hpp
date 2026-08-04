@@ -88,8 +88,8 @@ private:
 
 
 	[[ nodiscard ]]
-	inline std::uint32_t  match_grp ( std::size_t idx, 
-					  std::uint8_t fp ) const noexcept {
+	inline std::uint32_t  match_group ( std::size_t idx, 
+					    std::uint8_t fp ) const noexcept {
 
 		// load 32 control bytes into 1 avx register
 		const __m256i group  =  
@@ -105,8 +105,32 @@ private:
 		const __m256i cmp  =
 			_mm256_cmpeq_epi8( group, target );
 
+
 		// convert to bitmask
 		return  static_cast<std::uint32_t>(
+				_mm256_movemask_epi8( cmp ) );
+	}
+
+
+	// return bitmask of all EMPTY control bytes in a group
+	[[ nodiscard ]]
+	inline std::uint32_t  match_empty ( std::size_t idx ) const noexcept {
+	
+		// load the grp in avx register
+		const __m256i group =
+			_mm256_loadu_si256(
+				reinterpret_cast<const __m256i*>( &ctrl_[ idx ] ) );
+
+		// broadcast
+		const __m256i target =
+			_mm256_set1_epi8( static_cast<char>( EMPTY ) );
+
+		// compare
+		const __m256i cmp =
+			_mm256_cmpeq_epi8( group, target );
+
+		// convert to bitmask
+		return  static_cast<std::uint32_t>( 
 				_mm256_movemask_epi8( cmp ) );
 	}
 
@@ -237,8 +261,7 @@ public:
 			Entry& slot  =  entries_ [ idx ];
 			auto& state  =  ctrl_[ idx ];
 
-			if ( state == fingerprints( key ) &&
-			     slot.key == key ) {
+			if ( state != EMPTY && slot.key == key ) {
 
 				// found the target. erase it
 				// update meta data - no need to erase payload
@@ -254,7 +277,7 @@ public:
 
 				// keep shifting till empty slot
 				// or till ideal pos comes
-				while ( ctrl_[ next ] == fingerprints( key ) ) {
+				while ( ctrl_[ next ] != EMPTY ) {
 
 					Entry& next_slot  =  entries_[ next ];
 
