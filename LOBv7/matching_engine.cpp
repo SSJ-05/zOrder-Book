@@ -33,15 +33,12 @@ OrderPool
 void MatchingEngine::submit_order (Order* order) {
 
     ++submitted_;
-
-    MatchResult result;
     book_.add_order( order );
 
 
     while ( true ) {
 
-    	// result.released_count  =  0;
-	result = {};
+	MatchResult result = {};
 
 	if ( !book_.match_order( result ) ) break;
 
@@ -51,29 +48,28 @@ void MatchingEngine::submit_order (Order* order) {
         result.trade.trade_id      =  next_trade_id_++;
 
 
-        std::printf ("TRADE:\n" 
-                "Time    : %" PRIu64 "\n"
-                "TradeID : %" PRIu64 "\n"
-                "BuyID   : %" PRIu64 "\n"
-                "SellID  : %" PRIu64 "\n"
-                "Qty     : %" PRIu32 "\n"
-                "Exec Px : %.2f\n"
-                "Buy Px  : %.2f\n"
-                "Sell Px : %.2f\n"
-                "......................\n",
-                result.trade.timestamp_tsc,
-                result.trade.trade_id,
-                result.trade.buy_id,
-                result.trade.sell_id, 
-                result.trade.qty,
-                to_price (result.trade.exec_price),
-                to_price (result.trade.buy_price),
-                to_price (result.trade.sell_price)
-            );
+        // std::printf ("TRADE:\n" 
+        //         "Time    : %" PRIu64 "\n"
+        //         "TradeID : %" PRIu64 "\n"
+        //         "BuyID   : %" PRIu64 "\n"
+        //         "SellID  : %" PRIu64 "\n"
+        //         "Qty     : %" PRIu32 "\n"
+        //         "Exec Px : %.2f\n"
+        //         "Buy Px  : %.2f\n"
+        //         "Sell Px : %.2f\n"
+        //         "......................\n",
+        //         result.trade.timestamp_tsc,
+        //         result.trade.trade_id,
+        //         result.trade.buy_id,
+        //         result.trade.sell_id, 
+        //         result.trade.qty,
+        //         to_price (result.trade.exec_price),
+        //         to_price (result.trade.buy_price),
+        //         to_price (result.trade.sell_price)
+        //     );
 
-	// release matched orders back to pool
+	// release fully filled resting orders back to pool
 	// **release order irrelevant - backward loop produced fewer asm insts.
-	// for (auto i {}; i < result.released_count; ++i) {
 	for (auto i {result.released_count}; i-- > 0;) {
 		
 		++released_;
@@ -81,11 +77,14 @@ void MatchingEngine::submit_order (Order* order) {
 	}
 	fully_matched_ += result.released_count;
 
+	// if aggressive order is fully filled, cancel and release it
 	if (Order* o = book_.cancel_order( order->id )) {
+		
 		++cancelled_;
 		++released_;
 		pool_.release( o );
 	}
+	// order remains in the book with remaining qty
 
 	assert( !order->inlist );
 	assert( order->next == nullptr );
@@ -93,7 +92,6 @@ void MatchingEngine::submit_order (Order* order) {
 
     }	// while(true)
 	
-	// std::printf( "Deleted Tombs : %zu\n", book_.deleted_count() );
 }
 
 

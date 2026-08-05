@@ -17,10 +17,11 @@
 #include <cstdio>
 #include <cassert>
 #include <vector>
+#include <immintrin.h>
 
 
 constexpr std::size_t  ARENA_CAPACITY  { 1 << 20 };
-constexpr std::size_t  NUM_TRADES      { 1 << 20 };
+constexpr std::size_t  NUM_TRADES      { 1 << 19 };
 
 
 
@@ -46,6 +47,7 @@ int main () {
 	//    }
 
 
+    auto start = __rdtsc();
 
     // for (auto _ {NUM_TRADES}; _-- > 0;) {
     for (auto i {0uz}; i < NUM_TRADES; ++i) {
@@ -59,13 +61,16 @@ int main () {
         gen.next( order );
         engine.submit_order( order );
 
-	if ( (i+1) % 500'000 == 0 ) {
-		std::printf( "Processed : %zu\n", i+1 );
-		std::printf( "Book size : %zu\n", engine.book_size() );
-		assert( pool.live_orders() == engine.book_size() );
-	}
+	// if ( (i+1) % 100'000 == 0 ) {
+	// 	std::printf( "Processed : %zu\n", i+1 );
+	// 	std::printf( "Book size : %zu\n", engine.book_size() );
+	// 	assert( pool.live_orders() == engine.book_size() );
+	// }
     }
 
+    auto end = __rdtsc();
+
+    std::printf( "\nCycles per order : %zu\n", (end - start) / NUM_TRADES);
 
     // engine.print_book();     // for debugging only
 

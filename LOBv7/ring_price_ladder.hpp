@@ -15,7 +15,7 @@ class RingPriceLadder {
 
 private:
 
-    static constexpr std::size_t NUM_LEVELS_  { 1 << 12 };
+    static constexpr std::size_t NUM_LEVELS_  { 1 << 13 };
     static constexpr std::size_t MASK_        { NUM_LEVELS_ - 1 };
     static constexpr std::size_t INVALID_     { NUM_LEVELS_ };
 

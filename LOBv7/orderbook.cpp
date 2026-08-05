@@ -216,7 +216,7 @@ asks_.for_each_level([&](Price price, const PriceLevel& level)
             "%-10llu %-10u %-10s\n",
             static_cast<unsigned long long>(p->id),
             p->qty,
-            "BID");
+            "ASK");
     }
 
     std::printf("\n");
