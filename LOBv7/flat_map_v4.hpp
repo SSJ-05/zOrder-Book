@@ -262,7 +262,7 @@ public:
 
 				// probe_dist never exceeds Capacity
 				// as it is bounded by outer loop
-				if ( empty_dist >= probe_dist )
+				if ( empty_dist <= probe_dist )
 					return nullptr;
 			}
 
