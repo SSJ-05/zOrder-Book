@@ -21,7 +21,7 @@
 
 
 constexpr std::size_t  ARENA_CAPACITY  { 1 << 20 };
-constexpr std::size_t  NUM_TRADES      { 1 << 19 };
+constexpr std::size_t  NUM_TRADES      { 1 << 15 };
 
 
 

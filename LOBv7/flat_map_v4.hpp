@@ -139,7 +139,7 @@ private:
 public:
 
 	// overallocate to avoid UB in avx load
-	FlatMap() : entries_( Capacity ), 
+	FlatMap() : entries_( Capacity + GROUP_SIZE_ ), 
 		    ctrl_( Capacity + GROUP_SIZE_ ) 
 	{
 		std::fill( ctrl_.begin(), ctrl_.begin() + Capacity, EMPTY_ );

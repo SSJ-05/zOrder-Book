@@ -10,7 +10,8 @@
 #include "ring_price_ladder.hpp"
 // #include "flat_map_v1.hpp"
 // #include "flat_map_v2.hpp"
-#include "flat_map_v3.hpp"
+// #include "flat_map_v3.hpp"
+#include "flat_map_v4.hpp"
 
 
 // helps in identifying Price Level to be modified

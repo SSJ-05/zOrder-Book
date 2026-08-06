@@ -3,7 +3,7 @@
 #include <cassert>
 #include <iostream>
 #include <cstdint>
-#include "flat_map_v2.hpp"
+#include "flat_map_v4.hpp"
 
 #define TEST(name) \
     std::cout << "[TEST] " #name << "... "; \
