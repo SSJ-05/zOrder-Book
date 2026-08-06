@@ -30,6 +30,7 @@
  * Fingerprints
  * SIMD group probing
  * Prefetch
+ * NOTE: overallocate vectors to avoid UB after avx load and prefetch
  * */
 
 
@@ -53,11 +54,11 @@ class FlatMap {
 
 private:
 
-	static constexpr std::size_t   MASK   { Capacity - 1 };
+	static constexpr std::size_t   MASK_   { Capacity - 1 };
 
 	// states for control-byte meta data
-	static constexpr std::uint8_t  EMPTY       { 0x80 };
-	static constexpr std::uint8_t  GROUP_SIZE  { 32 };
+	static constexpr std::uint8_t  EMPTY_       { 0x80 };
+	static constexpr std::uint8_t  GROUP_SIZE_  { 32 };
 
 	static_assert( Capacity > 0 && 
 		      (Capacity & (Capacity - 1)) == 0,
@@ -123,7 +124,7 @@ private:
 
 		// broadcast
 		const __m256i target =
-			_mm256_set1_epi8( static_cast<char>( EMPTY ) );
+			_mm256_set1_epi8( static_cast<char>( EMPTY_ ) );
 
 		// compare
 		const __m256i cmp =
@@ -137,7 +138,13 @@ private:
 
 public:
 
-	FlatMap() : entries_( Capacity ), ctrl_( Capacity ) {}
+	// overallocate to avoid UB in avx load
+	FlatMap() : entries_( Capacity ), 
+		    ctrl_( Capacity + GROUP_SIZE_ ) 
+	{
+		std::fill( ctrl_.begin(), ctrl_.begin() + Capacity, EMPTY_ );
+		std::fill( ctrl_.begin() + Capacity, ctrl_.end(), EMPTY_ );
+	}
 	
 
 	// helper func
@@ -146,12 +153,16 @@ public:
 		return static_cast<std::uint8_t>( key & 0x7F );
 	}
 
-
+	inline void sync_mirror ( std::size_t idx ) noexcept {
+		
+		if ( idx < GROUP_SIZE_ )
+			ctrl_[ Capacity + idx ] = ctrl_[ idx ];
+	}
 
 	[[ nodiscard ]]
 	bool insert ( Key key, Value value ) {	// need mutable temporaries - pass by val
 
-		std::size_t idx  =  key & MASK;		// current bucket/idx
+		std::size_t idx  =  key & MASK_;	// current bucket/idx
 		std::size_t poor_dist  =  0uz;		// displacement of new ele
 
 		for (auto _ {Capacity}; _-- > 0;) {
@@ -165,19 +176,20 @@ public:
 				return false;
 
 			// insert
-			if ( state == EMPTY ) {
+			if ( state == EMPTY_ ) {
 
 				slot.key    =  key;
 				slot.value  =  value;
 
 				state  =  fp;
+				sync_mirror( idx );
 				++size_;
 				return true;
 			}
 
 			// displacement of existing ele
-			auto rich_ideal  =  slot.key & MASK;
-			auto rich_dist   =  (idx - rich_ideal) & MASK;	
+			auto rich_ideal  =  slot.key & MASK_;
+			auto rich_dist   =  (idx - rich_ideal) & MASK_;	
 			
 			// if existing element has smaller disp - swap
 			// poor/new element replaces rich/existing element
@@ -186,10 +198,13 @@ public:
 				std::swap( slot.key,   key );
 				std::swap( slot.value, value );
 				std::swap( poor_dist,  rich_dist );	
+
+				state = fingerprints( slot.key );
+				sync_mirror( idx );
 			}
 
 			// advance idx
-			idx  =  (idx + 1) & MASK;
+			idx  =  (idx + 1) & MASK_;
 			++poor_dist;
 		}
 
@@ -200,14 +215,25 @@ public:
 	[[ nodiscard ]]
 	Value*  find ( const Key& key ) {
 		
-		const std::size_t hash  =  key & MASK;
-		const std::uint8_t fp   =  fingerprints( key );
+		const std::size_t ideal  =  key & MASK_;
+		const std::uint8_t fp    =  fingerprints( key );
 
 		// align to group start
-		std::size_t group_idx  =  hash & ~(GROUP_SIZE - 1);
+		std::size_t group_idx  =  ideal & ~(GROUP_SIZE_ - 1);
 
-		for (auto _ {0uz}; _ < Capacity; _ += GROUP_SIZE) {
-			
+		// track probe dist while advancing thru groups
+		std::size_t probe_dist  {};
+
+		for (auto _ {0uz}; _ < Capacity; _ += GROUP_SIZE_) {
+
+			// prefetch entries_ (more expensive than ctrl_)
+			std::size_t next_group =
+				(group_idx + GROUP_SIZE_) & MASK_;
+
+			__builtin_prefetch( &entries_[ next_group ],	// addr to prefetch
+					    0, 				// read - 0, write - 1
+					    1 );			// locality - L3 cache 
+
 			// load 32 control bytes and match fingerprints
 			auto mask  =  match_group( group_idx, fp );
 
@@ -231,19 +257,20 @@ public:
 				std::size_t first_empty =
 					group_idx + __builtin_ctz( empty_mask );
 
-				std::size_t last_check =
-					group_idx + GROUP_SIZE - 1;
+				std::size_t empty_dist =
+					(first_empty - ideal) & MASK_;
+
+				// probe_dist never exceeds Capacity
+				// as it is bounded by outer loop
+				if ( empty_dist >= probe_dist )
+					return nullptr;
 			}
 
-			group_idx  =  (group_idx + GROUP_SIZE) & MASK;
-
-			// prefetch entries_ (more expensive than ctrl_)
-			__builtin_prefetch( &entries_[ group_idx ],	// addr to prefetch
-					    0, 				// read - 0, write - 1
-					    1 );			// locality - L3 cache 
+			group_idx  =  (group_idx + GROUP_SIZE_) & MASK_;
+			probe_dist += GROUP_SIZE_;
 		}
 
-		return nullptr;
+		return nullptr;		// entry not found
 	}	
 
 	// [[ nodiscard ]]
@@ -274,62 +301,69 @@ public:
 	[[ nodiscard ]]
 	bool  erase ( const Key& key ) {
 		
-		std::size_t idx  =  key & MASK;
+		std::size_t idx  =  key & MASK_;
 
 		for (auto _ {Capacity}; _-- > 0;) {
 			
 			Entry& slot  =  entries_ [ idx ];
 			auto& state  =  ctrl_[ idx ];
 
-			if ( state != EMPTY && slot.key == key ) {
+			if ( state != EMPTY_ && slot.key == key ) {
 
 				// found the target. erase it
 				// update meta data - no need to erase payload
 				// payload will be overwritten during insert()
 				// slot  = {};
-				state = EMPTY;	// mark the slot - hole 
+				state = EMPTY_;	// mark the slot - hole 
+				sync_mirror( idx );
 				--size_;
 
 				// now backfill the hole
 				auto hole = idx;
-				auto next = (hole + 1) & MASK;	// shift backward
+				auto next = (hole + 1) & MASK_;	// shift backward
 								// to fill the hole
 
 				// keep shifting till empty slot
 				// or till ideal pos comes
-				while ( ctrl_[ next ] != EMPTY ) {
+				while ( ctrl_[ next ] != EMPTY_ ) {
 
 					Entry& next_slot  =  entries_[ next ];
 
 					// ideal - natural pos of key, if 
 					// there were no collisions
-					auto ideal  =  next_slot.key & MASK;
+					auto ideal  =  next_slot.key & MASK_;
 				
 					// **Robinhood invariant
-					// after shifting, displacment must not...
-					// ...exceed threshold
-					// check if hole is in probe path and disp is...
-					// ...below threshold
-					auto dist   =  (next - ideal) & MASK;
+					// after shifting, displacment must not
+					// exceed threshold
+					auto dist   =  (next - ideal) & MASK_;
 
 					// if ele at ideal pos - stop shifting
 					if ( dist == 0 ) break;
+
+					// check if hole in the probe path
+					auto hole_dist  =  (hole - ideal) & MASK_;
+					if ( hole_dist > dist ) break;
 					/************************************************/
 
 					// shift backward
 					// move next_slot into hole
 					entries_[ hole ]  =  next_slot;
-					ctrl_[ hole ]     =  fingerprints( key );
-					ctrl_[ next ]     =  EMPTY;
+					
+					ctrl_[ hole ]     =  ctrl_[ next ];
+					sync_mirror( hole );
+					
+					ctrl_[ next ]     =  EMPTY_;
+					sync_mirror( next );
 
 					hole  =  next;
-					next  =  (next + 1) & MASK;
+					next  =  (next + 1) & MASK_;
 				}
 
 				return true;
 			}
 
-			idx  =  (idx + 1) & MASK;
+			idx  =  (idx + 1) & MASK_;
 		}
 
 		return false;	// full table, key not found
@@ -344,8 +378,8 @@ public:
 		}
 
 		std::fill( ctrl_.begin(),
-			   ctrl_.end(),
-			   EMPTY );
+			   ctrl_.begin() + Capacity + GROUP_SIZE_,
+			   EMPTY_ );
 
 		size_  =  0;
 	}
