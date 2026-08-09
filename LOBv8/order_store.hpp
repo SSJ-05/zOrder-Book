@@ -19,7 +19,20 @@ OrderBook
 ** recycle internal IDs
 ** this replaces both flatmap and orderpool
 
+** lifecycle of orderID
+acquire()
+   ↓
+bitmap bit = 0
+   ↓
+orders_[id] is active
+   ↓
+release(id)
+   ↓
+bitmap bit = 1
+   ↓
+ID reusable
 */
+
 
 #pragma once
 
@@ -39,25 +52,33 @@ namespace zerok {
 class OrderStore {
 
 private:
-	static constexpr std::size_t CAPACITY_   { 1 << 20 };
-	static constexpr std::size_t WORD_SHIFT_ { 6 };
-	static constexpr std::size_t NUM_WORDS_  { CAPACITY_ >> WORD_SHIFT_ };
-	static constexpr std::size_t INVALID_ID_ { std::numeric_limits<InteralID>::max() };
+	// constants
+	static constexpr std::size_t CAPACITY_       { 1 << 20 };
+	static constexpr std::size_t WORD_SHIFT_     { 6 };
+	static constexpr std::size_t NUM_WORDS_      { CAPACITY_ >> WORD_SHIFT_ };
+	static constexpr std::size_t BITS_PER_WORD_  { 1 << WORD_SHIFT_ };
 
 
+	// storage
 	std::vector<Order> orders_;
 
 	std::array<std::uint64_t, NUM_WORDS_> bitmap_;
 	// 1 - free, 0 - allocated
 
-	char pad_0 [ 64 ];
-	alignas(64)
+
+	// counters
+	char pad_0 [ 64 - sizeof(std::size_t) ];
 	std::size_t active_count_  {};
 
 	alignas(64)
-	std::size_t hint_word_  {};
+	std::size_t hint_word_  { NUM_WORDS_ - 1 };
+
 
 public:
+
+	static constexpr 
+	InternalID  INVALID_ID { std::numeric_limits<InternalID>::max() };
+
 	explicit OrderStore ()
 		: orders_ ( CAPACITY_ ) 
 	{
@@ -99,10 +120,12 @@ public:
 			const std::size_t slot  =  (word_idx << WORD_SHIFT_) | bit;
 			++active_count_;
 
+			orders_[ slot ]  =  Order {};	// reset to known state
+
 			return  slot;
 		}
 		assert( false && "OrderStore is full.\n" );
-		return INVALID_ID_;
+		return INVALID_ID;
 	}
 
 	// release order
@@ -112,17 +135,19 @@ public:
 		assert( slot < CAPACITY_ );
 
 		const std::size_t word  =  slot >> WORD_SHIFT_;
-		const std::size_t bit   =  slot & (BITS_PER_WORD - 1);
+		const std::size_t bit   =  slot & (BITS_PER_WORD_ - 1);
 
 		assert( (bitmap_[ word ] & ( 1ULL << bit )) == 0 );
 		bitmap_[ word ]  |=  ( 1ULL << bit ); 
 
+		assert( active_count_ > 0 );
+		orders_[ id ]  =  Order {};	// reset to default state
 		--active_count_;
 	}
 
 
 	// return the number of active orders
-	std::size_t size() const noexcept {
+	std::size_t active_count() const noexcept {
 		
 		return active_count_;
 	}
