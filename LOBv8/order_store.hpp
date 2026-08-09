@@ -52,7 +52,6 @@ namespace zerok {
 class OrderStore {
 
 private:
-
 	// constants
 	static constexpr std::size_t CAPACITY_       { 1 << 20 };
 	static constexpr std::size_t WORD_SHIFT_     { 6 };
@@ -63,7 +62,6 @@ private:
 	// storage
 	std::vector<Order> orders_;
 
-	// id allocation
 	std::array<std::uint64_t, NUM_WORDS_> bitmap_;
 	// 1 - free, 0 - allocated
 
@@ -72,9 +70,9 @@ private:
 	char pad_0 [ 64 - sizeof(std::size_t) ];
 	std::size_t active_count_  {};
 
-	// begin scan from last allocation
 	alignas(64)
-	std::size_t hint_word_  { NUM_WORDS_ - 1 };
+	// std::size_t hint_word_  { NUM_WORDS_ - 1 };
+	std::size_t hint_word_  {};
 
 
 public:
@@ -107,10 +105,11 @@ public:
 	[[ nodiscard ]]
 	InternalID  acquire () noexcept {
 
-		// allocation logic - spreading allocator
-		for (auto i {NUM_WORDS_}; i-- > 0;) {
+		// for (auto i {NUM_WORDS_}; i-- > 0;) {
+		for (auto i {0uz}; i < NUM_WORDS_; ++i) {
 		
-			std::size_t word_idx  =  (hint_word_ - i) & (NUM_WORDS_ - 1);
+			// std::size_t word_idx  =  (hint_word_ - i) & (NUM_WORDS_ - 1);
+			std::size_t word_idx  =  (hint_word_ + i) & (NUM_WORDS_ - 1);
 			std::uint64_t word    =  bitmap_[ word_idx ];
 
 			if ( word == 0 ) continue;
