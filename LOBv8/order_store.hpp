@@ -108,6 +108,14 @@ public:
 	// release order
 	void  release ( InternalID id ) noexcept {
 
+		const std::size_t slot  =  static_cast<std::size_t>( id );
+		assert( slot < CAPACITY_ );
+
+		const std::size_t word  =  slot >> WORD_SHIFT_;
+		const std::size_t bit   =  slot & (BITS_PER_WORD - 1);
+
+		assert( (bitmap_[ word ] & ( 1ULL << bit )) == 0 );
+		bitmap_[ word ]  |=  ( 1ULL << bit ); 
 
 		--active_count_;
 	}
