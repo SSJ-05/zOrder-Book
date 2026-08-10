@@ -22,7 +22,6 @@ OrderPool
 #include "orderv2.hpp"
 #include "trade.hpp"
 #include "orderbook.hpp"
-#include "order_pool.hpp"
 
 #include <cinttypes>
 #include <cstdio>
@@ -30,10 +29,15 @@ OrderPool
 #include <immintrin.h>
 
 
-void MatchingEngine::submit_order (Order* order) {
+void MatchingEngine::submit_order ( OrderID external_id,
+				    Price price, 
+				    Qty qty,
+				    Side side ) {
 
     ++submitted_;
-    book_.add_order( order );
+    InternalID id =
+	    book_.create_order( external_id, price, 
+			    	qty, side );
 
 
     while ( true ) {
@@ -42,12 +46,11 @@ void MatchingEngine::submit_order (Order* order) {
 
 	if ( !book_.match_order( result ) ) break;
 
-	assert( result.released_count <= 2 );
-
         result.trade.timestamp_tsc =  __rdtsc();
         result.trade.trade_id      =  next_trade_id_++;
 
 
+#ifndef NDEBUG
         std::printf ("TRADE:\n" 
                 "Time    : %" PRIu64 "\n"
                 "TradeID : %" PRIu64 "\n"
@@ -67,31 +70,20 @@ void MatchingEngine::submit_order (Order* order) {
                 to_price (result.trade.buy_price),
                 to_price (result.trade.sell_price)
             );
-
-	// release fully filled resting orders back to pool
-	// **release order irrelevant - backward loop produced fewer asm insts.
-	for (auto i {result.released_count}; i-- > 0;) {
-		
-		++released_;
-		pool_.release( result.released [i] );
-	}
-	fully_matched_ += result.released_count;
+#endif
 
 	// if aggressive order is fully filled, cancel and release it
-	if (Order* o = book_.cancel_order( order->id )) {
-		
-		++cancelled_;
-		++released_;
-		pool_.release( o );
-	}
-	// order remains in the book with remaining qty
+	Order& order  =  book_.order( id );
 
-	assert( !order->inlist );
-	assert( order->next == nullptr );
-	assert( order->prev == nullptr );
+	if ( order.qty == 0 ) {
+		if ( book_.cancel_order( id ) )
+			++cancelled_;
+
+		break;		// order is done, exit matching loop
+	}
+	// else: order remains in the book with remaining qty
 
     }	// while(true)
-	
 }
 
 
@@ -109,11 +101,9 @@ void MatchingEngine::print_stats() const noexcept {
     std::printf(
         "Submitted     : %zu\n"
         "Fully matched : %zu\n"
-        "Released      : %zu\n"
         "Cancelled     : %zu\n",
         submitted_,
         fully_matched_,
-        released_,
         cancelled_
 	);
 }
