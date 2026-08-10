@@ -1,4 +1,4 @@
-// orderbook src file// 07.07.26// ZeroK
+// orderbook src file// 10.08.26// ZeroK
 
 #include "orderv2.hpp"
 #include "trade.hpp"
@@ -13,7 +13,10 @@
 
 
 
-InternalID Orderbook::create_order () {
+InternalID Orderbook::create_order ( OrderID external_id,
+				     Price price, 
+				     Qty qty,
+				     Side side ) {
 
 	InternalID id  =  order_store_.acquire();
 
@@ -22,16 +25,15 @@ InternalID Orderbook::create_order () {
 
 	Order& order  =  order_store_[ id ];
 
-	order.external_id  =  ;
-	order.internal_id  =  id;
-	order.price        =  ;
-	order.qty          =  ;
-	order.side	   =  ;
+	order.external_id   =   external_id;
+	order.internal_id   =   id;
+	order.price         =   price;
+	order.qty           =   qty;
+	order.side	    =   side;
 
 	add_order( id );
 
 	return id;
-
 }
 
 
@@ -49,35 +51,36 @@ void Orderbook::add_order ( InternalID id ) {
 
 bool  Orderbook::cancel_order ( InternalID id ) {
 
-    Order& order = order_store_[ id ];   
+    Order& order  =  order_store_[ id ];   
+
+    if ( !order.inlist ) return false;	// already removed
 
     if ( order.side == Side::Bid )
         bids_.remove( &order );
     else
         asks_.remove( &order );
 
+    order_store_.release( id );
+
     return true;
 }
 
 
 
-Order*  Orderbook::modify_order ( OrderID id, 
-                                  Price new_price, 
-                        	  Qty new_qty ) {
+bool  Orderbook::modify_order ( InternalID id, 
+                                Price new_price, 
+                        	Qty new_qty ) {
 
-    OrderLocation* loc = order_map_.find( id );
-    if ( !loc ) return nullptr;
-
-    Order* order = loc->order;
+    Order& order = order_store_[ id ];
 
     cancel_order( id );
 
-    order->price = new_price;
-    order->qty   = new_qty;
+    order.price = new_price;
+    order.qty   = new_qty;
 
-    add_order( order );
+    add_order( id );
 
-    return order;
+    return true;
 }
 
 
@@ -98,6 +101,7 @@ bool Orderbook::match_order ( MatchResult& result ) {
 
     // update trade members
     result.trade.qty = std::min (bid->qty, ask->qty);
+
     bid->qty  -= result.trade.qty;
     ask->qty  -= result.trade.qty;
 
@@ -105,8 +109,8 @@ bool Orderbook::match_order ( MatchResult& result ) {
     bid_lvl->total_qty -= result.trade.qty;
     ask_lvl->total_qty -= result.trade.qty;
 
-    result.trade.buy_id  = bid->id;
-    result.trade.sell_id = ask->id;
+    result.trade.buy_id  = bid->external_id;
+    result.trade.sell_id = ask->external_id;
 
     result.trade.buy_price  = bid_lvl->price;
     result.trade.sell_price = ask_lvl->price;
@@ -116,21 +120,26 @@ bool Orderbook::match_order ( MatchResult& result ) {
     // order obj leaves the orderbook at this
     // remove bid ask for matched orders
     if ( bid->qty == 0 ) {
-        order_map_.erase( bid->id );
+
         bids_.remove( bid );
 
-	result.released [ result.released_count++ ] = bid;  // set the status for release
+	result.released[ result.released_count++ ] = 
+		bid->internal_id;  // set the status for release
 
+	order_store_.release( bid->internal_id );
     }
+
+
     if ( ask->qty == 0 ) {
-        order_map_.erase( ask->id );
+
         asks_.remove( ask );
 
-	result.released [ result.released_count++ ] = ask;
+	result.released[ result.released_count++ ] = 
+		ask->internal_id;
 
+	order_store_.release( ask->internal_id );
     }
 
-    assert( order_map_.size() == size() );
     return true;
 }
 
@@ -138,7 +147,7 @@ bool Orderbook::match_order ( MatchResult& result ) {
 
 std::size_t Orderbook::size() const noexcept {
 	
-	return order_map_.size();
+	return order_store_.active_count();
 }
 
 
@@ -182,8 +191,9 @@ bids_.for_each_level([&](Price price, const PriceLevel& level)
         level.orders.size());
 
     std::printf(
-        "%-10s %-10s %-10s\n",
-        "ID",
+        "%-10s %-10s %-10s %-10s\n",
+        "EXT_ID",
+        "INT_ID",
         "QTY",
         "SIDE");
 
@@ -192,8 +202,9 @@ bids_.for_each_level([&](Price price, const PriceLevel& level)
          p = level.orders.next(p))
     {
         std::printf(
-            "%-10llu %-10u %-10s\n",
-            static_cast<unsigned long long>(p->id),
+            "%-10llu %-10llu %-10u %-10s\n",
+            static_cast<unsigned long long>(p->external_id),
+            static_cast<unsigned long long>(p->internal_id),
             p->qty,
             "BID");
     }
@@ -213,8 +224,9 @@ asks_.for_each_level([&](Price price, const PriceLevel& level)
         level.orders.size());
 
     std::printf(
-        "%-10s %-10s %-10s\n",
-        "ID",
+        "%-10s %-10s %-10s %-10s\n",
+        "EXT_ID",
+        "INT_ID",
         "QTY",
         "SIDE");
 
@@ -223,8 +235,9 @@ asks_.for_each_level([&](Price price, const PriceLevel& level)
          p = level.orders.next(p))
     {
         std::printf(
-            "%-10llu %-10u %-10s\n",
-            static_cast<unsigned long long>(p->id),
+            "%-10llu %-10llu %-10u %-10s\n",
+            static_cast<unsigned long long>(p->external_id),
+            static_cast<unsigned long long>(p->internal_id),
             p->qty,
             "ASK");
     }
