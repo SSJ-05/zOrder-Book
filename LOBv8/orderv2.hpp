@@ -29,7 +29,8 @@ struct ListNode {
 // inherit from ListNode
 struct Order : ListNode {
 
-    OrderID  id     {};
+    OrderID  	external_id     {};	// belongs to market/gateway
+    InternalID 	internal_id 	{};	// belongs to matching engine
 
     Price    price  {};
     Qty      qty    {};
