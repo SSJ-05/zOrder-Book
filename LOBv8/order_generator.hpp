@@ -7,20 +7,30 @@
 
 #include <random>
 
+struct OrderParams {
+	
+	OrderID external_id;
+	Price   price;
+	Qty	qty;
+	Side	side;
+};
+
+
 class OrderGenerator {
 
 private:
+
     OrderID   id_;
     Price     mid_price_;
 
-    std::mt19937    rng_;
-    std::uniform_int_distribution <Price>   price_dist_;
-    std::uniform_int_distribution <Qty>     qty_dist_;
-    std::bernoulli_distribution side_dist_;
+    std::mt19937    				rng_;
+    std::uniform_int_distribution <Price>   	price_dist_;
+    std::uniform_int_distribution <Qty>     	qty_dist_;
+    std::bernoulli_distribution 		side_dist_;
 
 public:
     OrderGenerator() :
-        id_ (0),
+        id_ (1),		// start generation with order id 01
         mid_price_ (10000),
         // rng_ (std::random_device {} ()),
         rng_ ( 42 ),
@@ -28,6 +38,6 @@ public:
         qty_dist_ (1, 100),
         side_dist_ (0.5) {}
 
-    void next (Order*);
+    OrderParams next ();
 };
 

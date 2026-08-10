@@ -6,24 +6,22 @@
 #include <algorithm>    // for std::clamp
 
 
-void OrderGenerator::next( Order* order ) {
+OrderParams  OrderGenerator::next () {
     
-    // Price spread_ { 2 };
-
     mid_price_ += price_dist_(rng_);
 
     // optional clamp for keeping prices centered
     mid_price_ = std::clamp (
             mid_price_, Price {9000}, Price {13995} );
 
-    order->price = mid_price_;
-    
-    order->id    = ++id_;
+    OrderParams params;
+    params.external_id  =  ++id_;
+    params.price        =  mid_price_;
+    params.qty          =  qty_dist_(rng_);
+    params.side   	=  side_dist_(rng_) ?
+                     	   Side::Bid : Side::Ask;
 
-    order->qty   = qty_dist_(rng_);
 
-    order->side  = side_dist_(rng_) ?
-                  Side::Bid : Side::Ask;
-
+    return params;
 }
 
