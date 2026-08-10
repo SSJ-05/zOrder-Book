@@ -1,4 +1,9 @@
-// order book header file// 07.07.26// ZeroK
+// order book header file// 10.08.26// ZeroK
+
+/* workflow v8
+ * orderbook -> orderstore -> internal ID -> order
+ *
+ * */
 
 #pragma once
 
@@ -8,18 +13,7 @@
 #include "price_level.hpp"
 #include "intrusive_listv2.hpp"
 #include "ring_price_ladder.hpp"
-// #include "flat_map_v1.hpp"
-// #include "flat_map_v2.hpp"
-// #include "flat_map_v3.hpp"
-#include "flat_map_v4.hpp"
-
-
-// helps in identifying Price Level to be modified
-// w/o this, scan the whole order_map_
-struct OrderLocation {
-
-    Order*  order  { nullptr };
-};
+#include "order_store.hpp"
 
 
 
@@ -42,30 +36,27 @@ private:
     RingPriceLadder bids_;
     RingPriceLadder asks_;
 
-    // order map to cancel/modify in O(1)
-    // std::unordered_map <OrderID, OrderLocation> order_map_;
-
-    static constexpr std::size_t  CAPACITY_  { 1 << 20 };
-    zerok::FlatMap <OrderID, OrderLocation, CAPACITY_> order_map_;
-    // ***benchmark before replacing std::unordered_map with flat_map
+    zerok::OrderStore order_store_ {};
 
 
 public:
 
     Orderbook() : 
         bids_( 9000, Side::Bid ),
-        asks_( 9000, Side::Ask ) {}
+        asks_( 9000, Side::Ask ),
+	order_store_() {}
 
 
-    void add_order (Order*);
+    InternalID create_order ( /* */ );
 
-    bool match_order (MatchResult&);
+    void add_order ( InternalID );
 
-    // uo map lookup -> erase order -> erase hash entry
-    Order*  cancel_order (OrderID);    
+    bool match_order ( MatchResult& );
+
+    bool cancel_order ( InternalID );    
 
     // copy order -> cancel_order -> change price,qty -> add_order
-    Order*  modify_order (OrderID, Price, Qty);
+    Order*  modify_order ( OrderID, Price, Qty );
 
     [[ nodiscard ]]
     std::size_t size() const noexcept;

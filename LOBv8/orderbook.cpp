@@ -5,48 +5,58 @@
 #include "orderbook.hpp"
 #include "price_level.hpp"
 #include "intrusive_listv2.hpp"
+#include "order_store.hpp"
 
 #include <cstdio>
 #include <algorithm>
 #include <cassert>
 
 
-void Orderbook::add_order (Order* order) {
 
-    if ( order->side == Side::Bid )
-        bids_.add( order );
-    else 
-        asks_.add( order );
-        
+InternalID Orderbook::create_order () {
 
-    bool inserted = 
-    	order_map_.insert (
-            order->id, 
-            OrderLocation { order }
-        );
-    assert( inserted );		// make sure insert succeeds
-    assert( order_map_.size() == size() );
+	InternalID id  =  order_store_.acquire();
+
+	if ( id == OrderStore::INVALID_ID )
+		return id;
+
+	Order& order  =  order_store_[ id ];
+
+	order.external_id  =  ;
+	order.internal_id  =  id;
+	order.price        =  ;
+	order.qty          =  ;
+	order.side	   =  ;
+
+	add_order( id );
+
+	return id;
+
+}
+
+
+void Orderbook::add_order ( InternalID id ) {
+
+	Order& order  =  order_store_[ id ];
+
+    	if ( order.side == Side::Bid )
+        	bids_.add( &order );
+    	else 
+        	asks_.add( &order );
 }
 
 
 
-Order*  Orderbook::cancel_order (OrderID id) {
+bool  Orderbook::cancel_order ( InternalID id ) {
 
-    // lookup order in hashmap
-    auto* pos = order_map_.find( id );
-    if ( !pos ) return nullptr;
+    Order& order = order_store_[ id ];   
 
-    Order* order = pos->order;   // cache the ptr before remove
-
-    if ( order->side == Side::Bid )
-        bids_.remove( order );
+    if ( order.side == Side::Bid )
+        bids_.remove( &order );
     else
-        asks_.remove( order );
+        asks_.remove( &order );
 
-    order_map_.erase( id );    
-
-    assert( order_map_.size() == size() );
-    return order;
+    return true;
 }
 
 
