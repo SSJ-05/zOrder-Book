@@ -21,10 +21,8 @@
 // transfer match result from orderbook to matching engine
 struct MatchResult {
 
-	bool		matched {};
-	Trade   	trade;
-	InternalID  	released [2] {};	// buy and/or sell - 2 orders/cases
-	std::uint8_t	released_count {};	// counts cases to be released to pool
+	bool	matched {};
+	Trade   trade;
 };
 
 

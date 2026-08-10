@@ -1,4 +1,13 @@
 // orderbook src file// 10.08.26// ZeroK
+/* 
+ * OrderBook
+ ├── creates Order
+ ├── adds Order
+ ├── removes Order
+ ├── releases Order
+ └── owns OrderStore
+ */
+
 
 #include "orderv2.hpp"
 #include "trade.hpp"
@@ -73,11 +82,19 @@ bool  Orderbook::modify_order ( InternalID id,
 
     Order& order = order_store_[ id ];
 
-    cancel_order( id );
+    if ( !order.inlist ) return false;
 
+    // remove
+    if ( order.side == Side::Bid )
+	    bids_.remove( &order );
+    else
+	    asks_.remove( &order );
+
+    // modify
     order.price = new_price;
     order.qty   = new_qty;
 
+    // reinsert
     add_order( id );
 
     return true;
@@ -123,9 +140,6 @@ bool Orderbook::match_order ( MatchResult& result ) {
 
         bids_.remove( bid );
 
-	result.released[ result.released_count++ ] = 
-		bid->internal_id;  // set the status for release
-
 	order_store_.release( bid->internal_id );
     }
 
@@ -133,9 +147,6 @@ bool Orderbook::match_order ( MatchResult& result ) {
     if ( ask->qty == 0 ) {
 
         asks_.remove( ask );
-
-	result.released[ result.released_count++ ] = 
-		ask->internal_id;
 
 	order_store_.release( ask->internal_id );
     }
