@@ -21,7 +21,6 @@ OrderParams  OrderGenerator::next () {
     params.side   	=  side_dist_(rng_) ?
                      	   Side::Bid : Side::Ask;
 
-
     return params;
 }
 

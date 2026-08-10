@@ -52,6 +52,7 @@ namespace zerok {
 class OrderStore {
 
 private:
+
 	// constants
 	static constexpr std::size_t CAPACITY_       { 1 << 20 };
 	static constexpr std::size_t WORD_SHIFT_     { 6 };
@@ -130,6 +131,7 @@ public:
 		assert( false && "OrderStore is full.\n" );
 		return INVALID_ID;
 	}
+
 
 	// release order
 	void  release ( InternalID id ) noexcept {

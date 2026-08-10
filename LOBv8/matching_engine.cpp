@@ -18,6 +18,8 @@ MatchingEngine
 OrderPool
 */
 
+
+
 #include "matching_engine.hpp"
 #include "orderv2.hpp"
 #include "trade.hpp"
@@ -27,6 +29,7 @@ OrderPool
 #include <cstdio>
 
 #include <immintrin.h>
+
 
 
 void MatchingEngine::submit_order ( OrderID external_id,
@@ -39,7 +42,7 @@ void MatchingEngine::submit_order ( OrderID external_id,
 	    book_.create_order( external_id, price, 
 			    	qty, side );
 
-    if ( id == OrderStore::INVALID_ID ) return;	  // book full
+    if ( id == zerok::OrderStore::INVALID_ID ) return;	  // book full
 
 
     while ( true ) {

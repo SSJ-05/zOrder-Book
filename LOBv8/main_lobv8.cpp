@@ -38,8 +38,8 @@ int main () {
     // for (auto _ {NUM_TRADES}; _-- > 0;) {
     for (auto i {0uz}; i < NUM_TRADES; ++i) {
 
-        auto params  =  gen.next( order );
-        engine.submit_order( params.externa_id, 
+        auto params  =  gen.next();
+        engine.submit_order( params.external_id, 
 			     params.price,
 			     params.qty,
 			     params.side );

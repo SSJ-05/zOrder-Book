@@ -36,7 +36,7 @@ InternalID Orderbook::create_order ( OrderID external_id,
 
 	InternalID id  =  order_store_.acquire();
 
-	if ( id == OrderStore::INVALID_ID )
+	if ( id == zerok::OrderStore::INVALID_ID )
 		return id;
 
 	Order& order  =  order_store_[ id ];

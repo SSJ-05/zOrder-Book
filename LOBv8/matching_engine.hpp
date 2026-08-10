@@ -15,14 +15,10 @@ private:
 
     // counters
     std::size_t  submitted_ {};
-    std::size_t  fully_matched_ {};
     std::size_t  cancelled_ {};
 
 
 public:
-
-    // explicit MatchingEngine (OrderPool& pool)
-    //  : pool_ (pool) {}
 
     void submit_order ( OrderID external_id,
 		        Price price,

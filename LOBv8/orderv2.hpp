@@ -1,4 +1,4 @@
-// order header file// 07.07.26// ZeroK
+// order header file// 10.08.26// ZeroK
 // separate meta data (ListNode) from business data (Order)
 
 
@@ -41,3 +41,4 @@ struct Order : ListNode {
 static_assert( std::is_trivially_copyable_v<Order> );
 static_assert( std::is_trivially_destructible_v<Order> );
 static_assert( sizeof( Order ) <= 64, "Order must fit in a single cache line\n" );
+
