@@ -23,7 +23,7 @@ struct MatchResult {
 
 	bool		matched {};
 	Trade   	trade;
-	Order*  	released [2] {};	// buy and/or sell - 2 orders/cases
+	InternalID  	released [2] {};	// buy and/or sell - 2 orders/cases
 	std::uint8_t	released_count {};	// counts cases to be released to pool
 };
 
@@ -36,7 +36,7 @@ private:
     RingPriceLadder bids_;
     RingPriceLadder asks_;
 
-    zerok::OrderStore order_store_ {};
+    zerok::OrderStore order_store_;
 
 
 public:
@@ -47,18 +47,23 @@ public:
 	order_store_() {}
 
 
-    InternalID create_order ( /* */ );
+    InternalID create_order ( OrderID external_id,
+		              Price price,
+			      Qty qty,
+			      Side side );
 
-    void add_order ( InternalID );
+    void add_order ( InternalID id );
 
-    bool match_order ( MatchResult& );
+    bool cancel_order ( InternalID id );    
 
-    bool cancel_order ( InternalID );    
+    bool match_order ( MatchResult& result );
 
-    // copy order -> cancel_order -> change price,qty -> add_order
-    Order*  modify_order ( OrderID, Price, Qty );
+    bool modify_order ( InternalID id,
+		    	Price new_price,
+			Qty new_qty );
 
-    [[ nodiscard ]]
+    Order& order (InternalID id ) noexcept;
+
     std::size_t size() const noexcept;
     
     void print_book() const noexcept;
