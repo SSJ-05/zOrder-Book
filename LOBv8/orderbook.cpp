@@ -22,6 +22,13 @@
 
 
 
+Order&  Orderbook::order ( InternalID id ) noexcept {
+
+	return order_store_[ id ];
+}
+
+
+
 InternalID Orderbook::create_order ( OrderID external_id,
 				     Price price, 
 				     Qty qty,
@@ -150,6 +157,8 @@ bool Orderbook::match_order ( MatchResult& result ) {
 
 	order_store_.release( ask->internal_id );
     }
+
+    result.matched  =  true;
 
     return true;
 }

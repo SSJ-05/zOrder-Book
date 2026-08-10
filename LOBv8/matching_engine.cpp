@@ -39,6 +39,8 @@ void MatchingEngine::submit_order ( OrderID external_id,
 	    book_.create_order( external_id, price, 
 			    	qty, side );
 
+    if ( id == OrderStore::INVALID_ID ) return;	  // book full
+
 
     while ( true ) {
 
@@ -100,10 +102,8 @@ void MatchingEngine::print_stats() const noexcept {
 
     std::printf(
         "Submitted     : %zu\n"
-        "Fully matched : %zu\n"
         "Cancelled     : %zu\n",
         submitted_,
-        fully_matched_,
         cancelled_
 	);
 }
