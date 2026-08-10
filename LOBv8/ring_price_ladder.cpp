@@ -72,12 +72,8 @@ void RingPriceLadder::add (Order* order) noexcept {
 
 void RingPriceLadder::update_best_after_add (Price new_price) noexcept {
     
-    const std::size_t idx = to_idx( new_price );
-    
-    // first order in orderbook
-    // if ( at_level( new_price ).orders.size() == 1 ) {
     if ( best_idx_ == INVALID_ ) {
-        best_idx_ = idx;
+        best_idx_ = to_idx( new_price );
         return;
     }
 
@@ -86,67 +82,50 @@ void RingPriceLadder::update_best_after_add (Price new_price) noexcept {
 
     if ( side_ == Side::Bid ) {
         if ( new_price > best_price ) 
-            best_idx_ = idx;
+            best_idx_ = to_idx( new_price );
     }
     else {   // Ask
         if ( new_price < best_price )
-            best_idx_ = idx;
+            best_idx_ = to_idx( new_price );
     }
+
 }
 
 
-void RingPriceLadder::update_best_after_remove (Price removed_price) noexcept {
+
+void  RingPriceLadder::update_best_after_remove (Price removed_price) noexcept {
 
     if ( to_idx( removed_price ) != best_idx_ ) return;
 
-    // bid
     if (side_ == Side::Bid) {
-	    // scan from best_idx_ downwards, wrapping around
-	    Price best_so_far = std::numeric_limits<Price>::min();
-	    std::size_t new_best = INVALID_;
 
-	    for (auto i {0uz}; i < NUM_LEVELS_; ++i) {
+	    for (auto i {1uz}; i < NUM_LEVELS_; ++i) {
 		
 		    // scan backward from best_idx -1
-		    std::size_t idx = (best_idx_ -i -1) & MASK_;
+		    std::size_t idx = (best_idx_ - i) & MASK_;
 
 		    if ( !rpl_[ idx ].orders.empty() ) {
 			
-			    Price p = base_price_ + 
-				    	static_cast<Price>( idx );
-			    
-			    if ( p > best_so_far ) {
-				best_so_far  =  p;
-				new_best     =  idx;
-			    }
+			    best_idx_  =  idx;
+			    return;
 		    }
 	    }
-	    best_idx_  =  new_best;	// INVALID_ if not found
     }
+    else {	// ask
 
-    // ask
-    else {
-       	    Price best_so_far = std::numeric_limits<Price>::min();
-	    std::size_t new_best = INVALID_;
-
-	    for (auto i {0uz}; i < NUM_LEVELS_; ++i) {
+	    for (auto i {1uz}; i < NUM_LEVELS_; ++i) {
 		
-		    // scan forward from best_idx +1
-		    std::size_t idx = (best_idx_ +i +1) & MASK_;
+		    std::size_t idx = (best_idx_ + i) & MASK_;
 
 		    if ( !rpl_[ idx ].orders.empty() ) {
-			
-			    Price p = base_price_ + 
-				    	static_cast<Price>( idx );
-			    
-			    if ( p < best_so_far ) {
-				best_so_far  =  p;
-				new_best     =  idx;
-			    }
+		    	
+			    best_idx_  =  idx;
+			    return;
 		    }
 	    }
-	    best_idx_  =  new_best;
     }
+
+    best_idx_  =  INVALID_;
 
 }
 
