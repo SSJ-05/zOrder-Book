@@ -18,25 +18,27 @@
 #include <immintrin.h>
 
 
-constexpr std::size_t  NUM_TRADES  { 1 << 5 };
+constexpr std::size_t  NUM_TRADES  { 1 << 20 };
 
 
 
 int main () {
 
+#ifndef NDEBUG
     std::printf ("\n\n=== Session Open ===\n\n");
 
     std::printf ("size of order: %zu\n", sizeof(Order));  // debugging only
+#endif
 
 
     OrderGenerator gen;
     MatchingEngine engine;
 
 
-    auto start = __rdtsc();
+    // auto start = __rdtsc();
 
-    // for (auto _ {NUM_TRADES}; _-- > 0;) {
-    for (auto i {0uz}; i < NUM_TRADES; ++i) {
+    for (auto _ {NUM_TRADES}; _-- > 0;) {
+    // for (auto i {0uz}; i < NUM_TRADES; ++i) {
 
         auto params  =  gen.next();
         engine.submit_order( params.external_id, 
@@ -46,8 +48,9 @@ int main () {
 
     }
 
-    auto end = __rdtsc();
+    // auto end = __rdtsc();
 
+#ifndef NDEBUG
     std::printf( "\nCycles per order : %zu\n", (end - start) / NUM_TRADES);
     std::printf( "Engine book size   : %zu\n", engine.book_size() );
 
@@ -56,6 +59,7 @@ int main () {
 
     std::printf ("\n\n=== zOrder Book Closed ===\n");
     std::printf ("\n\n=== Session Closed ===\n\n");
+#endif
 
     return EXIT_SUCCESS;
 }

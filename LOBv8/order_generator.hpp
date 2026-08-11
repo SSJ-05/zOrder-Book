@@ -5,7 +5,6 @@
 #include "types.hpp"
 #include "orderv2.hpp"
 
-#include <random>
 
 struct OrderParams {
 	
@@ -20,23 +19,27 @@ class OrderGenerator {
 
 private:
 
-    OrderID   id_;
-    Price     mid_price_;
+    OrderID       id_;
+    Price     	  mid_price_;
+    std::uint64_t rng_state_;
 
-    std::mt19937    				rng_;
-    std::uniform_int_distribution <Price>   	price_dist_;
-    std::uniform_int_distribution <Qty>     	qty_dist_;
-    std::bernoulli_distribution 		side_dist_;
+
+    std::uint64_t fast_rand () {
+	
+	    rng_state_ ^=  rng_state_ << 13;
+    	    rng_state_ ^=  rng_state_ >> 7;
+            rng_state_ ^=  rng_state_ << 17;
+    	    
+	    return rng_state_;
+    }
+
 
 public:
     OrderGenerator() :
         id_ (1),		// start generation with order id 01
         mid_price_ (10000),
-        // rng_ (std::random_device {} ()),
-        rng_ ( 42 ),
-        price_dist_ (-2, 2),
-        qty_dist_ (1, 100),
-        side_dist_ (0.5) {}
+        rng_state_ ( 42 ) {}
+
 
     OrderParams next ();
 };

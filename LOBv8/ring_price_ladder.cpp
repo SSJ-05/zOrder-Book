@@ -80,6 +80,7 @@ void RingPriceLadder::update_best_after_add (Price new_price) noexcept {
     Price best_price = base_price_ 
                        + static_cast<Price>( best_idx_ );
 
+
     if ( side_ == Side::Bid ) {
         if ( new_price > best_price ) 
             best_idx_ = to_idx( new_price );
@@ -105,7 +106,6 @@ void  RingPriceLadder::update_best_after_remove (Price removed_price) noexcept {
 		    std::size_t idx = (best_idx_ - i) & MASK_;
 
 		    if ( !rpl_[ idx ].orders.empty() ) {
-			
 			    best_idx_  =  idx;
 			    return;
 		    }
@@ -118,7 +118,6 @@ void  RingPriceLadder::update_best_after_remove (Price removed_price) noexcept {
 		    std::size_t idx = (best_idx_ + i) & MASK_;
 
 		    if ( !rpl_[ idx ].orders.empty() ) {
-		    	
 			    best_idx_  =  idx;
 			    return;
 		    }
