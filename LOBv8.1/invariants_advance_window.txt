@@ -1,0 +1,20 @@
+*****************************************************************
+	invariants of advance_window() func in RingPriceLadder
+*****************************************************************
+
+1a. keep entire price level array of size 8192. use the window of size 2048
+as hot cache.
+1b. circular ring (hot) + sparse extreme levels (cold)
+
+2. orders are neither destroyed nor moved. only the window shifts across the
+8192 levels
+
+3. Ladder 	==  price level indexing only
+   OrderStore 	==  owns orders
+
+4. ladder size  =  8192 -> 81.92  prices
+   window size  =  2048 -> 20.48
+   slide  by    =  512  -> 5.12
+
+   slide trigger = ( window_high_ - window_low_ ) / 2 + 512
+
