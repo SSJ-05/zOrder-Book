@@ -49,7 +49,20 @@ public:
     // ctor
     explicit RingPriceLadder (Price base, Side side) 
 	    : 	base_price_ (base),
-        	side_ (side) {}
+        	side_ (side) 
+	{
+		if ( side == Side::Bid ) {
+			window_low_  = base_price_;
+			window_high_ = base_price_ + 
+					static_cast<Price>( WINDOW_SIZE_ - 1 );
+		} 
+		else {	// Ask
+			window_low_  = base_price_ + 
+					static_cast<Price>( WINDOW_SIZE_ - 1 );
+			window_high_ = base_price_ +
+					static_cast<Price>( NUM_LEVELS_ - 1 );
+		}
+	}
 
 
     // ops

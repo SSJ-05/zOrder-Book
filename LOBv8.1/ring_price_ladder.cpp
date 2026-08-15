@@ -54,9 +54,7 @@ const PriceLevel&  RingPriceLadder::at_level (Price p) const noexcept {
 void RingPriceLadder::add (Order* order) noexcept {
     
     if ( !contains( order->price ) ) {
-	std::printf( "OUT OF RANGE : %u\n", order->price );
-	assert( false );
-        // advance_window( order->price );
+        center_window( order->price );
     }
 
     PriceLevel& lvl = at_level( order->price );
@@ -71,7 +69,6 @@ void RingPriceLadder::add (Order* order) noexcept {
     lvl.total_qty += order->qty;
 
     update_best_after_add( order->price );
-
 }
 
 
@@ -80,21 +77,23 @@ void RingPriceLadder::update_best_after_add (Price new_price) noexcept {
     
     if ( best_idx_ == INVALID_ ) {
         best_idx_ = to_idx( new_price );
+	center_window( new_price );
         return;
     }
 
-    // Price best_price = base_price_ 
-    //                    + static_cast<Price>( best_idx_ );
-    Price best_price  =  rpl_[ best_idx_ ].price;
+    Price best_price = base_price_ + static_cast<Price>( best_idx_ );
+    // Price best_price  =  rpl_[ best_idx_ ].price;
 
 
     if ( side_ == Side::Bid ) {
         if ( new_price > best_price ) 
             best_idx_ = to_idx( new_price );
+	    center_window( new_price );
     }
     else {   // Ask
         if ( new_price < best_price )
             best_idx_ = to_idx( new_price );
+	    center_window( new_price );
     }
 
 }
@@ -274,8 +273,8 @@ void  RingPriceLadder::center_window ( Price center ) noexcept {
 	if ( high > ring_max )   high  ==  ring_max;
 
 
-
-
+	window_low_  =  low;
+	window_high_ =  high;
 }
 
 
