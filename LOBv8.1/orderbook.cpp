@@ -171,7 +171,7 @@ std::size_t Orderbook::size() const noexcept {
 }
 
 
-
+#ifndef NDEBUG
 void Orderbook::print_book() const noexcept {
 
     std::printf(
@@ -267,5 +267,9 @@ asks_.for_each_level([&](Price price, const PriceLevel& level)
 
     std::printf(
         "=================================================\n\n");
+
+    bids_.print_stats();
+    asks_.print_stats();
 }
+#endif
 

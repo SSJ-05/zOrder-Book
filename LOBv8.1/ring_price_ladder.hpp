@@ -34,17 +34,19 @@ private:
     Side         side_        { Side::Bid };
     std::size_t  best_idx_    { INVALID_ };
 
-    // debug counters
-#ifndef NDEBUG
-	std::size_t  window_hits_   {};
-	std::size_t  window_misses_ {};
-#endif
 
     // storage for price levels
     std::array<PriceLevel, NUM_LEVELS_> rpl_;
 
 
 public:
+    
+    // debug counters
+#ifndef NDEBUG
+	std::size_t  window_hits_   {};
+	std::size_t  window_misses_ {};
+#endif
+
 
     // ctor
     explicit RingPriceLadder (Price base, Side side) 

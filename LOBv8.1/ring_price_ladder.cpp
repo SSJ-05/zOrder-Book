@@ -14,6 +14,7 @@
 #include <cassert>
 #include <cstdio>
 #include <limits>
+#include <algorithm>
 
 
 // helper func to calculate index
@@ -86,14 +87,16 @@ void RingPriceLadder::update_best_after_add (Price new_price) noexcept {
 
 
     if ( side_ == Side::Bid ) {
-        if ( new_price > best_price ) 
+        if ( new_price > best_price ) {
             best_idx_ = to_idx( new_price );
 	    center_window( new_price );
+	}
     }
     else {   // Ask
-        if ( new_price < best_price )
+        if ( new_price < best_price ) {
             best_idx_ = to_idx( new_price );
 	    center_window( new_price );
+	}
     }
 
 }
@@ -104,11 +107,15 @@ void  RingPriceLadder::update_best_after_remove (Price removed_price) noexcept {
 
     if ( to_idx( removed_price ) != best_idx_ ) return;
 
+    const Price best_price  =  rpl_[ best_idx_ ].price;
+    const Price ring_min    =  base_price_;
+    const Price ring_max    =  base_price_ + static_cast<Price>( NUM_LEVELS_ - 1 );
 
     if (side_ == Side::Bid) {
 
 	    // Phase 1: scan downward in window
-	    for ( Price p = best_price - 1; p >= window_low_; --p ) {
+	    Price scan_low  =  std::max( window_low_, ring_min );
+	    for ( Price p = best_price - 1; p >= scan_low; --p ) {
 		
 		    if ( !at_level( p ).orders.empty() ) {
 			    best_idx_  =  to_idx( p );
@@ -120,10 +127,10 @@ void  RingPriceLadder::update_best_after_remove (Price removed_price) noexcept {
 	    }
 
 	    // Phase 2: fallback - scan outside window (below window_low_)
-	    while ( advance_window_up() ) {
+	    while ( advance_window_down() ) {
 		
 		    for ( Price search_p = window_high_;
-			  search_p > window_low_; --search_p ) {
+			  search_p >= window_low_; --search_p ) {
 			
 			    if ( !at_level( search_p ).orders.empty() ) {
 				    best_idx_  =  to_idx( search_p );
@@ -151,7 +158,8 @@ void  RingPriceLadder::update_best_after_remove (Price removed_price) noexcept {
     }
     else {	// ask
 	    // Phase 1: scan window
-	    for (Price p = best_price + 1; p <= window_high_; ++p) {
+	    Price scan_high  =  std::min( window_high_, ring_max );
+	    for (Price p = best_price + 1; p <= scan_high; ++p) {
 		
 		    if ( !at_level( p ).orders.empty() ) {
 			    best_idx_  =  to_idx( p );
@@ -163,10 +171,10 @@ void  RingPriceLadder::update_best_after_remove (Price removed_price) noexcept {
 	    }
 
 	    // Phase 2: fallback - search outside window (above window_high)
-	    while ( advance_window_down() ) {
+	    while ( advance_window_up() ) {
 
 		    for ( Price search_p = window_low_;
-			  search_p < window_high_; ++search_p ) {
+			  search_p <= window_high_; ++search_p ) {
 
 			    if ( !at_level( search_p ).orders.empty() ) {
 				    best_idx_  =  to_idx( search_p );
@@ -262,14 +270,23 @@ bool  RingPriceLadder::in_window ( Price p ) const noexcept {
 
 void  RingPriceLadder::center_window ( Price center ) noexcept {
 
-	Price ring_max  =  base_price_ + static_cast<Price>( NUM_LEVELS_ - 1 );
+	const Price ring_min  =  base_price_;
+	const Price ring_max  =  base_price_ + static_cast<Price>( NUM_LEVELS_ - 1 );
 
-	Price low   =  center - static_cast<Price>( WINDOW_SIZE_ >> 1 );
-	Price high  =  center + static_cast<Price>( WINDOW_SIZE_ >> 1 );
+	Price low   =  center - static_cast<Price>( WINDOW_SIZE_ / 2 );
+	Price high  =  center + static_cast<Price>( WINDOW_SIZE_ - 1 );
 
 	// maintain the size of window
-	if ( low < base_price_ ) low   ==  base_price_;
-	if ( high > ring_max )   high  ==  ring_max;
+	if ( low < base_price_ ) {
+		low   =  base_price_;
+		high  =  base_price_ + static_cast<Price>( WINDOW_SIZE_ - 1 );
+		if ( high > ring_max ) high  =  ring_max;
+	}
+	if ( high > ring_max ) {
+		high  =  ring_max;
+		low   =  ring_max - static_cast<Price>( WINDOW_SIZE_ - 1 );
+		if ( low < ring_min ) low  =  ring_min;
+	}
 
 
 	window_low_  =  low;
@@ -282,18 +299,24 @@ bool  RingPriceLadder::advance_window_up () noexcept {
 	Price new_low   =  window_low_  + static_cast<Price>( SLIDE_ );
 	Price new_high  =  window_high_ + static_cast<Price>( SLIDE_ );
 
+	const Price ring_min  =  base_price_;
+	const Price ring_max  =  base_price_ + static_cast<Price>( NUM_LEVELS_ - 1 );
+
 	// check if window is within bounds
 	if ( new_low < base_price_ ) {
 		new_low  =  base_price_;
 		new_high =  new_low + static_cast<Price>( WINDOW_SIZE_ - 1 );
+		if ( new_high > ring_max ) new_low  =  ring_max;
 	}
 
-	Price ring_max = base_price_ + static_cast<Price>( NUM_LEVELS_ - 1 );
 	if ( new_high > ring_max ) {
 		new_high  =  ring_max;
 		new_low   =  new_high - static_cast<Price>( WINDOW_SIZE_ - 1 );
-		if ( new_low < base_price_ ) new_low  =  base_price_;
+		if ( new_low < ring_min ) new_low  =  ring_min;
 	}
+
+	if ( new_low  < ring_min ) new_low  =  ring_min;
+	if ( new_high < ring_max ) new_high =  ring_max;
 
 	if ( new_low == window_low_ && new_high == window_high_ ) 
 		return false;
@@ -305,23 +328,29 @@ bool  RingPriceLadder::advance_window_up () noexcept {
 }
 
 
-void  RingPriceLadder::advance_window_down () noexcept {
+bool  RingPriceLadder::advance_window_down () noexcept {
 
 	Price new_low   =  window_low_  - static_cast<Price>( SLIDE_ );
 	Price new_high  =  window_high_ - static_cast<Price>( SLIDE_ );
 
+	const Price ring_min  =  base_price_;
+	const Price ring_max  =  base_price_ + static_cast<Price>( NUM_LEVELS_ - 1 );
+
 	// check new window is within bounds
-	if ( new_high < base_price_ ) {
-		new_high  =  base_price_;
-		new_low   =  new_high + static_cast<Price>( WINDOW_SIZE_ - 1 );
+	if ( new_high < ring_min ) {
+		new_high  =  ring_min;
+		new_low   =  ring_min + static_cast<Price>( WINDOW_SIZE_ - 1 );
+		if ( new_low > ring_max ) new_low  =  ring_max;
 	}
 
-	Price ring_max  =  base_price_ + static_cast<Price>( NUM_LEVELS_ - 1 );
 	if ( new_low > ring_max ) {
 		new_low  =  ring_max;
-		new_high =  new_low - static_cast<Price>( WINDOW_SIZE_ - 1 );
-		if ( new_high < base_price_ ) new_high  =  base_price_;
+		new_high =  ring_max - static_cast<Price>( WINDOW_SIZE_ - 1 );
+		if ( new_high < ring_min ) new_high  =  ring_min;
 	}
+
+	if ( new_low  < ring_min ) new_low  =  ring_min;
+	if ( new_high > ring_max ) new_high =  ring_max;
 
 	if ( new_low == window_low_ && new_high == window_high_ )
 		return false;
@@ -336,10 +365,12 @@ void  RingPriceLadder::advance_window_down () noexcept {
 #ifndef NDEBUG
 void  RingPriceLadder::print_stats() const noexcept {
 
-	std::printf( "\n------------------------\n"
+	std::printf( "\n   ------------------------\n"
+		     "\tSide : %s\n"
 		     "\tWindow hits   : %zu\n"
 		     "\tWindow misses : %zu\n"
-		     "------------------------\n",
+		     "   ------------------------\n",
+		     side_ == Side::Bid ? "Bid" : "Ask",
 		     window_hits_, window_misses_ );
 }
 #endif
