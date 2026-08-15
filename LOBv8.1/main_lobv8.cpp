@@ -51,10 +51,10 @@ int main () {
     // auto end = __rdtsc();
 
 #ifndef NDEBUG
-    std::printf( "\nCycles per order : %zu\n", (end - start) / NUM_TRADES);
+    // std::printf( "\nCycles per order : %zu\n", (end - start) / NUM_TRADES);
     std::printf( "Engine book size   : %zu\n", engine.book_size() );
 
-    // engine.print_book();     // for debugging only
+    engine.print_book();     // for debugging only
     // engine.print_stats();
 
     std::printf ("\n\n=== zOrder Book Closed ===\n");

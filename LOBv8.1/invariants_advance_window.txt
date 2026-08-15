@@ -12,9 +12,14 @@ as hot cache.
 3. Ladder 	==  price level indexing only
    OrderStore 	==  owns orders
 
-4. ladder size  =  8192 -> 81.92  prices
-   window size  =  2048 -> 20.48
-   slide  by    =  512  -> 5.12
+4. ladder size  =  8192 -> $81.92  prices
+   window size  =  2048 -> $20.48
+   slide  by    =  512  -> $05.12
 
    slide trigger = ( window_high_ - window_low_ ) / 2 + 512
+
+5. window_high_ - window_low_ + 1 == WINDOW_SIZE_
+
+6. Window is a logical hot region. It never moves PriceLevel storage.
+Physical storage remains anchored at base_price_.
 

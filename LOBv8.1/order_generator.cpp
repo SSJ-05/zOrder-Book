@@ -8,7 +8,21 @@
 
 OrderParams  OrderGenerator::next () {
     
-    mid_price_ += static_cast<Price>( (fast_rand() % 5) - 2 );
+	// const auto r = fast_rand();
+	//
+	// if ( (r % 100) == 0 ) {
+	//
+	// 	const Price jump = 
+	// 		static_cast<Price>( fast_rand() % 2049 ) - 1024;
+	// 	mid_price_ += jump;
+	// }
+	// else {
+	//
+	// 	mid_price_ += 
+	// 		static_cast<Price>( fast_rand() % 5 ) - 2;
+	// }
+
+	mid_price_ += static_cast<Price>( fast_rand() % 5 ) - 2;
 
     // optional clamp for keeping prices centered
     mid_price_ = std::clamp (

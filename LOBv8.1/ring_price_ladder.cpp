@@ -37,7 +37,10 @@ bool RingPriceLadder::contains (Price p) const noexcept {
 // getter funcs for rpl_[index]
 PriceLevel&  RingPriceLadder::at_level (Price p) noexcept {
 
-    assert( contains ( p ) );
+	assert( p >= base_price_ );
+	assert( p < base_price_ + static_cast<Price>( NUM_LEVELS_ ) );
+
+    // assert( contains ( p ) );
     return rpl_[ to_idx( p ) ];
 }
 
@@ -46,7 +49,10 @@ PriceLevel&  RingPriceLadder::at_level (Price p) noexcept {
 // for read-only in print_book
 const PriceLevel&  RingPriceLadder::at_level (Price p) const noexcept {
 
-    assert( contains ( p ) );
+	assert( p >= base_price_ );
+	assert( p < base_price_ + static_cast<Price>( NUM_LEVELS_ ) );
+
+    // assert( contains ( p ) );
     return rpl_[ to_idx( p ) ];
 }
 
@@ -274,7 +280,7 @@ void  RingPriceLadder::center_window ( Price center ) noexcept {
 	const Price ring_max  =  base_price_ + static_cast<Price>( NUM_LEVELS_ - 1 );
 
 	Price low   =  center - static_cast<Price>( WINDOW_SIZE_ / 2 );
-	Price high  =  center + static_cast<Price>( WINDOW_SIZE_ - 1 );
+	Price high  =  center + static_cast<Price>( WINDOW_SIZE_ / 2 );
 
 	// maintain the size of window
 	if ( low < base_price_ ) {
@@ -291,6 +297,12 @@ void  RingPriceLadder::center_window ( Price center ) noexcept {
 
 	window_low_  =  low;
 	window_high_ =  high;
+
+	assert( window_low_ >= base_price_ );
+	assert( window_high_ <=
+       		base_price_ + static_cast<Price>( NUM_LEVELS_ - 1 ) );
+	assert( window_high_ >= window_low_ );
+
 }
 
 
@@ -303,26 +315,30 @@ bool  RingPriceLadder::advance_window_up () noexcept {
 	const Price ring_max  =  base_price_ + static_cast<Price>( NUM_LEVELS_ - 1 );
 
 	// check if window is within bounds
-	if ( new_low < base_price_ ) {
-		new_low  =  base_price_;
-		new_high =  new_low + static_cast<Price>( WINDOW_SIZE_ - 1 );
-		if ( new_high > ring_max ) new_low  =  ring_max;
+	if ( new_low < ring_min ) {
+		new_low  =  ring_min;
+		new_high =  ring_min + static_cast<Price>( WINDOW_SIZE_ - 1 );
+		// if ( new_high > ring_max ) new_low  =  ring_max;
 	}
 
 	if ( new_high > ring_max ) {
 		new_high  =  ring_max;
-		new_low   =  new_high - static_cast<Price>( WINDOW_SIZE_ - 1 );
-		if ( new_low < ring_min ) new_low  =  ring_min;
+		new_low   =  ring_max - static_cast<Price>( WINDOW_SIZE_ - 1 );
+		// if ( new_low < ring_min ) new_low  =  ring_min;
 	}
 
-	if ( new_low  < ring_min ) new_low  =  ring_min;
-	if ( new_high < ring_max ) new_high =  ring_max;
+	// if ( new_low  < ring_min ) new_low  =  ring_min;
+	// if ( new_high < ring_max ) new_high =  ring_max;
 
 	if ( new_low == window_low_ && new_high == window_high_ ) 
 		return false;
 
 	window_low_  =  new_low;
 	window_high_ =  new_high;
+
+	assert( window_low_ >= ring_min );
+	assert( window_high_ <= ring_max );
+	assert( window_high_ >= window_low_ );
 
 	return true;
 }
@@ -337,26 +353,30 @@ bool  RingPriceLadder::advance_window_down () noexcept {
 	const Price ring_max  =  base_price_ + static_cast<Price>( NUM_LEVELS_ - 1 );
 
 	// check new window is within bounds
-	if ( new_high < ring_min ) {
-		new_high  =  ring_min;
-		new_low   =  ring_min + static_cast<Price>( WINDOW_SIZE_ - 1 );
-		if ( new_low > ring_max ) new_low  =  ring_max;
+	if ( new_high > ring_max ) {
+		new_high  =  ring_max;
+		new_low   =  ring_max - static_cast<Price>( WINDOW_SIZE_ - 1 );
+		// if ( new_low > ring_max ) new_low  =  ring_max;
 	}
 
-	if ( new_low > ring_max ) {
-		new_low  =  ring_max;
-		new_high =  ring_max - static_cast<Price>( WINDOW_SIZE_ - 1 );
-		if ( new_high < ring_min ) new_high  =  ring_min;
+	if ( new_low < ring_min ) {
+		new_low  =  ring_min;
+		new_high =  ring_min + static_cast<Price>( WINDOW_SIZE_ - 1 );
+		// if ( new_high < ring_min ) new_high  =  ring_min;
 	}
 
-	if ( new_low  < ring_min ) new_low  =  ring_min;
-	if ( new_high > ring_max ) new_high =  ring_max;
+	// if ( new_low  < ring_min ) new_low  =  ring_min;
+	// if ( new_high > ring_max ) new_high =  ring_max;
 
 	if ( new_low == window_low_ && new_high == window_high_ )
 		return false;
 
 	window_low_  =  new_low;
 	window_high_ =  new_high;
+
+	assert( window_low_ >= ring_min );
+	assert( window_high_ <= ring_max );
+	assert( window_high_ >= window_low_ );
 
 	return true;
 }
