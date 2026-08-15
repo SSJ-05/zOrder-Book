@@ -219,7 +219,6 @@ void RingPriceLadder::remove (Order* order) noexcept {
 
     // 2. and reset the level
     lvl.total_qty = 0;
-
 }
 
 
@@ -277,4 +276,71 @@ void  RingPriceLadder::center_window ( Price center ) noexcept {
 	window_high_ =  high;
 }
 
+
+bool  RingPriceLadder::advance_window_up () noexcept {
+
+	Price new_low   =  window_low_  + static_cast<Price>( SLIDE_ );
+	Price new_high  =  window_high_ + static_cast<Price>( SLIDE_ );
+
+	// check if window is within bounds
+	if ( new_low < base_price_ ) {
+		new_low  =  base_price_;
+		new_high =  new_low + static_cast<Price>( WINDOW_SIZE_ - 1 );
+	}
+
+	Price ring_max = base_price_ + static_cast<Price>( NUM_LEVELS_ - 1 );
+	if ( new_high > ring_max ) {
+		new_high  =  ring_max;
+		new_low   =  new_high - static_cast<Price>( WINDOW_SIZE_ - 1 );
+		if ( new_low < base_price_ ) new_low  =  base_price_;
+	}
+
+	if ( new_low == window_low_ && new_high == window_high_ ) 
+		return false;
+
+	window_low_  =  new_low;
+	window_high_ =  new_high;
+
+	return true;
+}
+
+
+void  RingPriceLadder::advance_window_down () noexcept {
+
+	Price new_low   =  window_low_  - static_cast<Price>( SLIDE_ );
+	Price new_high  =  window_high_ - static_cast<Price>( SLIDE_ );
+
+	// check new window is within bounds
+	if ( new_high < base_price_ ) {
+		new_high  =  base_price_;
+		new_low   =  new_high + static_cast<Price>( WINDOW_SIZE_ - 1 );
+	}
+
+	Price ring_max  =  base_price_ + static_cast<Price>( NUM_LEVELS_ - 1 );
+	if ( new_low > ring_max ) {
+		new_low  =  ring_max;
+		new_high =  new_low - static_cast<Price>( WINDOW_SIZE_ - 1 );
+		if ( new_high < base_price_ ) new_high  =  base_price_;
+	}
+
+	if ( new_low == window_low_ && new_high == window_high_ )
+		return false;
+
+	window_low_  =  new_low;
+	window_high_ =  new_high;
+
+	return true;
+}
+
+
+#ifndef NDEBUG
+void  RingPriceLadder::print_stats() const noexcept {
+
+	std::printf( "\n------------------------\n"
+		     "\tWindow hits   : %zu\n"
+		     "\tWindow misses : %zu\n"
+		     "------------------------\n",
+		     window_hits_, window_misses_ );
+}
+#endif
 

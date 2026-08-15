@@ -1,4 +1,4 @@
-// ring price ladder header file// 13.08.26// ZeroK
+// ring price ladder header file// 15.08.26// ZeroK
 
 #pragma once
 
