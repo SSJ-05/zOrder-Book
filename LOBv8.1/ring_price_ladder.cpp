@@ -105,34 +105,97 @@ void  RingPriceLadder::update_best_after_remove (Price removed_price) noexcept {
 
     if ( to_idx( removed_price ) != best_idx_ ) return;
 
+
     if (side_ == Side::Bid) {
 
-	    for (auto i {1uz}; i < NUM_LEVELS_; ++i) {
+	    // Phase 1: scan downward in window
+	    for ( Price p = best_price - 1; p >= window_low_; --p ) {
 		
-		    // scan backward from best_idx -1
-		    std::size_t idx = (best_idx_ - i) & MASK_;
+		    if ( !at_level( p ).orders.empty() ) {
+			    best_idx_  =  to_idx( p );
+#ifndef NDEBUG
+			    ++window_hits_;
+#endif
+			    return;
+		    }
+	    }
 
+	    // Phase 2: fallback - scan outside window (below window_low_)
+	    while ( advance_window_up() ) {
+		
+		    for ( Price search_p = window_high_;
+			  search_p > window_low_; --search_p ) {
+			
+			    if ( !at_level( search_p ).orders.empty() ) {
+				    best_idx_  =  to_idx( search_p );
+#ifndef NDEBUG
+				    ++window_misses_;
+#endif
+				    return;
+			    }
+		    }
+	    }
+
+	    // Phase 3: fallback - full ring scan if window cant slide
+	    for ( auto i {1uz}; i < NUM_LEVELS_; ++i ) {
+		
+		    std::size_t idx = (best_idx_ - i) & MASK_;
+		    
 		    if ( !rpl_[ idx ].orders.empty() ) {
 			    best_idx_  =  idx;
+#ifndef NDEBUG
+			    ++window_misses_;
+#endif
 			    return;
 		    }
 	    }
     }
     else {	// ask
-
-	    for (auto i {1uz}; i < NUM_LEVELS_; ++i) {
+	    // Phase 1: scan window
+	    for (Price p = best_price + 1; p <= window_high_; ++p) {
 		
-		    std::size_t idx = (best_idx_ + i) & MASK_;
-
-		    if ( !rpl_[ idx ].orders.empty() ) {
-			    best_idx_  =  idx;
+		    if ( !at_level( p ).orders.empty() ) {
+			    best_idx_  =  to_idx( p );
+#ifndef NDEBUG
+			    ++window_hits_;
+#endif
 			    return;
 		    }
 	    }
-    }
 
+	    // Phase 2: fallback - search outside window (above window_high)
+	    while ( advance_window_down() ) {
+
+		    for ( Price search_p = window_low_;
+			  search_p < window_high_; ++search_p ) {
+
+			    if ( !at_level( search_p ).orders.empty() ) {
+				    best_idx_  =  to_idx( search_p );
+#ifndef NDEBUG
+				    ++window_misses_;
+#endif
+				    return;
+			    }
+		    }
+	    }
+
+	    // Phase 3: fallback - full ring scan
+	    for ( auto i {1uz}; i < NUM_LEVELS_; ++i ) {
+		
+		    std::size_t idx = (best_idx_ + i) & MASK_;
+		    
+		    if ( !rpl_[ idx ].orders.empty() ) {
+			    best_idx_  =  idx;
+#ifndef NDEBUG
+			    ++window_misses_;
+#endif
+			    return;
+		    }
+	    }
+    }	// else
+
+    // not found in window
     best_idx_  =  INVALID_;
-
 }
 
 
@@ -199,9 +262,20 @@ bool  RingPriceLadder::in_window ( Price p ) const noexcept {
 }
 
 
+void  RingPriceLadder::center_window ( Price center ) noexcept {
 
-void maybe_advance_window ( Price p ) noexcept {
+	Price ring_max  =  base_price_ + static_cast<Price>( NUM_LEVELS_ - 1 );
 
-	window_low_   =  p;
-	window_high_  =  p + WINDOW_SIZE_ - 1;
+	Price low   =  center - static_cast<Price>( WINDOW_SIZE_ >> 1 );
+	Price high  =  center + static_cast<Price>( WINDOW_SIZE_ >> 1 );
+
+	// maintain the size of window
+	if ( low < base_price_ ) low   ==  base_price_;
+	if ( high > ring_max )   high  ==  ring_max;
+
+
+
+
 }
+
+
