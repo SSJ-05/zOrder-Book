@@ -9,6 +9,7 @@
 
 #include <array>
 #include <cstdint>
+#include <cassert>
 
 
 namespace zerok {
@@ -22,6 +23,12 @@ private:
 	static constexpr std::size_t BITS_PER_WORD_   	{ 1 << WORD_SHIFT_ };
 	static constexpr std::size_t NUM_WORDS_   	{ CAPACITY_ >> WORD_SHIFT_ };
 
+	static_assert( (CAPACITY_ & (CAPACITY_ -1)) == 0,
+			"CAPACITY_ must be a multiple of 64" );
+	static_assert( (NUM_WORDS_ & (NUM_WORDS_ -1)) == 0,
+			"NUM_WORDS_ must be power of 2" );
+
+
 	// storage for price levels
 	std::array<PriceLevel, CAPACITY_> levels_;
 
@@ -30,7 +37,6 @@ private:
 
 
 	// stats counter
-	char pad_0 [ 64 - sizeof( std::size_t ) ];
 	std::size_t  active_count_ {};		// count no. of active levels in data strc
 
 	std::size_t  hint_word_ {};
@@ -63,7 +69,11 @@ public:
 			++active_count_;
 			hint_word_  =  word_idx;
 
-			return &levels_[ index ];
+			PriceLevel* level  =  &levels_[ index ];
+
+			*level  =  PriceLevel {};	// reset the state
+
+			return level;
 		} 
 		return nullptr;
 	}
@@ -77,6 +87,7 @@ public:
 		assert( level >= levels_.data() );
 		assert( level < levels_.data() + CAPACITY_ );
 
+		// invariants
 		assert( level->orders.empty() );
 		assert( level->total_qty == 0 );
 
@@ -87,9 +98,12 @@ public:
 
 		const unsigned bit  =  index & (BITS_PER_WORD_ - 1);
 
+		// bit must be set to 0 before it is set to 1
 		assert( (bitmap_[ word ] & (1ULL << bit)) == 0 );
 
-		bitmap_[ word ]  |=  ( 1ULL << bit );
+		*level  =  PriceLevel {};
+
+		bitmap_[ word ]  |=  ( 1ULL << bit );	// set bit to 1
 
 		--active_count_;
 
@@ -97,18 +111,6 @@ public:
 			hint_word_  =  word;
 	}
 
-
-	inline
-	PriceLevel&  operator[] ( std::size_t id ) noexcept {
-	
-		return  levels_[ id ];
-	}
-
-	inline
-	const PriceLevel&  operator[] ( std::size_t id ) const noexcept {
-
-		return  levels_[ id ];
-	}
 
 
 	[[ nodiscard ]]
