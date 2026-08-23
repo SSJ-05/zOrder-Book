@@ -87,7 +87,7 @@ public:
 		assert( level >= levels_.data() );
 		assert( level < levels_.data() + CAPACITY_ );
 
-		// invariants
+		// core invariants
 		assert( level->orders.empty() );
 		assert( level->total_qty == 0 );
 

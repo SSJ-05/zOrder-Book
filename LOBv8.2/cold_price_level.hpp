@@ -46,7 +46,6 @@ ColdPriceLevel
 #include <cassert>
 
 
-namespace zerok {
 
 class ColdPriceLevel {
 
@@ -144,5 +143,4 @@ public:
 
 };
 
-}	// namespace
 
