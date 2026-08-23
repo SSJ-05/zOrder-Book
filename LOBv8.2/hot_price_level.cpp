@@ -37,7 +37,9 @@ bool HotPriceLevel::contains (Price p) const noexcept {
 PriceLevel&  HotPriceLevel::at_level (Price p) noexcept {
 
     assert( contains ( p ) );
-    return rpl_[ to_idx( p ) ];
+    assert( hot_[ to_idx( p ) ] != nullptr );
+
+    return *hot_[ to_idx( p ) ];
 }
 
 
@@ -46,7 +48,9 @@ PriceLevel&  HotPriceLevel::at_level (Price p) noexcept {
 const PriceLevel&  HotPriceLevel::at_level (Price p) const noexcept {
 
     assert( contains ( p ) );
-    return rpl_[ to_idx( p ) ];
+    assert( hot_[ to_idx( p ) ] != nullptr );
+
+    return *hot_[ to_idx( p ) ];   
 }
 
 
@@ -178,24 +182,20 @@ PriceLevel* HotPriceLevel::best_level() noexcept {
 
     if ( best_idx_ == INVALID_ ) return nullptr;
 
-    return &rpl_[best_idx_];
+    return &hot_[best_idx_];
 }
 
 const PriceLevel* HotPriceLevel::best_level() const noexcept {
 
     if ( best_idx_ == INVALID_ ) return nullptr;
 
-    return &rpl_[best_idx_];
+    return &hot_[best_idx_];
 }
 
 PriceLevel*  HotPriceLevel::find ( Price price ) noexcept {
 
-	if ( !in_window( price ) ) return nullptr;
+	if ( !contains( price ) ) return nullptr;
 
-	PriceLevel& level  =  at_level( price );
-
-	if ( level.orders.empty() ) return nullptr;
-
-	return &level;
+	return hot_[ to_idx( price ) ];
 }
 

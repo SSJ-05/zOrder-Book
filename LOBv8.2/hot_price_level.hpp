@@ -21,12 +21,9 @@ OrderStore
 #include "types.hpp"
 #include "orderv2.hpp"
 #include "price_level.hpp"
-#include "price_level_store.hpp"
-#include "cold_price_level.hpp"
 
 #include <array>
 #include <cstdint>
-
 
 
 class HotPriceLevel {
@@ -52,11 +49,9 @@ private:
     Side         side_        { Side::Bid };
     std::size_t  best_idx_    { INVALID_ };
 
-    /*******************************************************************/
+    // hot idx only - dosnt own PriceLevel	
+    std::array<PriceLevel*, NUM_LEVELS_>  hot_  {};
 
-    // storage for cold price levels
-    // std::lower_bound for lookup O(log n)
-    std::array<PriceLevel*, NUM_LEVELS_>  hot_;
 
 public:
     
@@ -72,26 +67,31 @@ public:
 	    : 	base_price_ (base),
         	side_ (side),
 		window_low_ (base),
-		window_high_ (base + static_cast<Price>( WINDOW_SIZE_ - 1 )) {}
+		window_high_ (base + static_cast<Price>( WINDOW_SIZE_ - 1 )) 
+    {}
 
 
-    // ops
-    void  add          ( Order* ) noexcept;
-    void  remove       ( Order* ) noexcept;
-    void  clear_level  ( Price )  noexcept;
+    // level add/remove from hot_
+    void  promote      	( Order*, PriceLevel* ) noexcept;
+    void  demote	( Order* ) noexcept;
+    // void  clear_level  	( Price )  noexcept;
 
+    // matching ops
     void  update_best_after_add    ( Price ) noexcept;
     void  update_best_after_remove ( Price ) noexcept;
 
     std::size_t  to_idx   ( Price ) const noexcept;
     bool         contains ( Price ) const noexcept;
 
-    const PriceLevel&  at_level ( Price ) const noexcept;
-          PriceLevel&  at_level ( Price )       noexcept;
+    // const PriceLevel&  at_level ( Price ) const noexcept;
+    //       PriceLevel&  at_level ( Price )       noexcept;
 
     const PriceLevel*  best_level()     const noexcept;
     	  PriceLevel*  best_level()           noexcept;
+
+    const PriceLevel*  find ( Price ) 	const noexcept;
     	  PriceLevel*  find ( Price ) 	      noexcept;
+
 
 
     // iteration interface
@@ -100,12 +100,12 @@ public:
 
 		for (auto i {0uz}; i < NUM_LEVELS_; ++i) {
 		
-			const auto& level = hot_[i];
+			const PriceLevel* level = hot_[i];
 
-			if ( level.orders.empty() ) continue;
+			if ( level == nullptr ) continue;
 
-			fn ( base_price_ 
-				+ static_cast<Price>( i ), level );
+			fn ( base_price_ + static_cast<Price>( i ),
+			     *level );
 		}
 	}  
 
