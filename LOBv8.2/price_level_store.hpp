@@ -23,7 +23,7 @@ private:
 	static constexpr std::size_t BITS_PER_WORD_   	{ 1 << WORD_SHIFT_ };
 	static constexpr std::size_t NUM_WORDS_   	{ CAPACITY_ >> WORD_SHIFT_ };
 
-	static_assert( (CAPACITY_ & (CAPACITY_ -1)) == 0,
+	static_assert( (CAPACITY_ & (BITS_PER_WORD_ -1)) == 0,
 			"CAPACITY_ must be a multiple of 64" );
 	static_assert( (NUM_WORDS_ & (NUM_WORDS_ -1)) == 0,
 			"NUM_WORDS_ must be power of 2" );
@@ -38,7 +38,6 @@ private:
 
 	// stats counter
 	std::size_t  active_count_ {};		// count no. of active levels in data strc
-
 	std::size_t  hint_word_ {};
 
 
@@ -101,32 +100,23 @@ public:
 		// bit must be set to 0 before it is set to 1
 		assert( (bitmap_[ word ] & (1ULL << bit)) == 0 );
 
-		*level  =  PriceLevel {};
-
 		bitmap_[ word ]  |=  ( 1ULL << bit );	// set bit to 1
 
 		--active_count_;
 
-		if ( word < hint_word_ ) 
-			hint_word_  =  word;
+		if ( word < hint_word_ ) hint_word_  =  word;
 	}
 
 
 
 	[[ nodiscard ]]
 	inline
-	std::size_t  active_count () const noexcept {
-	
-		return  active_count_;
-	}
+	std::size_t  active_count () const noexcept { return  active_count_; }
 
 
 	[[ nodiscard ]]
 	inline
-	std::size_t  capacity () const noexcept {
-	
-		return  CAPACITY_;
-	}
+	std::size_t  capacity () const noexcept { return  CAPACITY_; }
 
 };
 
