@@ -33,52 +33,6 @@ bool HotPriceLevel::contains (Price p) const noexcept {
 }
 
 
-// getter funcs for rpl_[index]
-PriceLevel&  HotPriceLevel::at_level (Price p) noexcept {
-
-    assert( contains ( p ) );
-    assert( hot_[ to_idx( p ) ] != nullptr );
-
-    return *hot_[ to_idx( p ) ];
-}
-
-
-
-// for read-only in print_book
-const PriceLevel&  HotPriceLevel::at_level (Price p) const noexcept {
-
-    assert( contains ( p ) );
-    assert( hot_[ to_idx( p ) ] != nullptr );
-
-    return *hot_[ to_idx( p ) ];   
-}
-
-
-
-void HotPriceLevel::add (Order* order) noexcept {
-    
-    if ( !contains( order->price ) ) {
-	std::printf( "OUT OF RANGE : %u\n", order->price );
-	assert( false );
-        // advance_window( order->price );
-    }
-
-    PriceLevel& lvl = at_level( order->price );
-        
-    if ( lvl.price != order->price ) {
-        lvl.price      =  order->price;
-        lvl.total_qty  =  0;
-    }
-
-    lvl.orders.push_back( order );
-
-    lvl.total_qty += order->qty;
-
-    update_best_after_add( order->price );
-
-}
-
-
 
 void HotPriceLevel::update_best_after_add (Price new_price) noexcept {
     
@@ -87,9 +41,10 @@ void HotPriceLevel::update_best_after_add (Price new_price) noexcept {
         return;
     }
 
-    // Price best_price = base_price_ 
-    //                    + static_cast<Price>( best_idx_ );
-    Price best_price  =  rpl_[ best_idx_ ].price;
+    PriceLevel* best  =  hot_[ best_idx_ ];
+    assert( best != nullptr );	
+
+    const Price best_price  =  best->price;
 
 
     if ( side_ == Side::Bid ) {
@@ -100,23 +55,33 @@ void HotPriceLevel::update_best_after_add (Price new_price) noexcept {
         if ( new_price < best_price )
             best_idx_ = to_idx( new_price );
     }
-
 }
 
 
 
 void  HotPriceLevel::update_best_after_remove (Price removed_price) noexcept {
 
+    if ( best_idx_ == INVALID_ ) return;
+    PriceLevel* current_best  =  hot_[ best_idx_ ];
+
     if ( to_idx( removed_price ) != best_idx_ ) return;
+
+    /* demote() clears hot_[idx] before calling this
+     * if removed price was best, hot[best_idx_] is now nullptr
+     * */
+
+    const std::size_t removed_idx  =  to_idx( removed_price );
+    if ( removed_idx != best_idx_ ) return;
+
 
     if (side_ == Side::Bid) {
 
 	    for (auto i {1uz}; i < NUM_LEVELS_; ++i) {
 		
 		    // scan backward from best_idx -1
-		    std::size_t idx = (best_idx_ - i) & MASK_;
+		    const std::size_t idx = (best_idx_ - i) & MASK_;
 
-		    if ( !rpl_[ idx ].orders.empty() ) {
+		    if ( hot_[ idx ] != nullptr ) {
 			    best_idx_  =  idx;
 			    return;
 		    }
@@ -126,9 +91,9 @@ void  HotPriceLevel::update_best_after_remove (Price removed_price) noexcept {
 
 	    for (auto i {1uz}; i < NUM_LEVELS_; ++i) {
 		
-		    std::size_t idx = (best_idx_ + i) & MASK_;
+		    const std::size_t idx = (best_idx_ + i) & MASK_;
 
-		    if ( !rpl_[ idx ].orders.empty() ) {
+		    if ( hot_[ idx ] != nullptr ) {
 			    best_idx_  =  idx;
 			    return;
 		    }
@@ -136,66 +101,89 @@ void  HotPriceLevel::update_best_after_remove (Price removed_price) noexcept {
     }
 
     best_idx_  =  INVALID_;
-
 }
 
 
 
-void HotPriceLevel::remove (Order* order) noexcept {
-    
-    assert( order != nullptr );
-
-    PriceLevel& lvl = at_level( order->price );
-
-    // remove from FIFO
-    lvl.orders.erase( order );
-
-    // update total qty
-    lvl.total_qty -= order->qty;
-
-    // check if level still has orders
-    if ( !lvl.orders.empty() ) return;
-
-    // 1. if level becomes empty after remove
-    update_best_after_remove( order->price );
-
-    // 2. and reset the level
-    lvl.total_qty = 0;
-
-}
-
-
-
-void  HotPriceLevel::clear_level (Price new_price) noexcept {
-
-    PriceLevel& lvl    =  at_level( new_price );
-    lvl.price          =  new_price;
-    lvl.total_qty      =  0;
-
-    assert( lvl.orders.empty() );
-    lvl.orders.clear();
-}
-
-
-
-PriceLevel* HotPriceLevel::best_level() noexcept {
+PriceLevel*  HotPriceLevel::best_level() noexcept {
 
     if ( best_idx_ == INVALID_ ) return nullptr;
 
-    return &hot_[best_idx_];
+    PriceLevel* level  =  hot_[ best_idx_ ];
+    assert( level != nullptr );
+
+    return level;
 }
 
-const PriceLevel* HotPriceLevel::best_level() const noexcept {
+const PriceLevel*  HotPriceLevel::best_level() const noexcept {
 
     if ( best_idx_ == INVALID_ ) return nullptr;
 
-    return &hot_[best_idx_];
+    PriceLevel* level  =  hot_[ best_idx_ ];
+    assert( level != nullptr );
+
+    return level;
 }
+
 
 PriceLevel*  HotPriceLevel::find ( Price price ) noexcept {
 
 	if ( !contains( price ) ) return nullptr;
 
-	return hot_[ to_idx( price ) ];
+	PriceLevel* level  =  hot_[ to_idx( price ) ];
+
+	if ( level == nullptr ) return nullptr;
+	if ( level->price != price ) return nullptr;
+
+	return level;
+}
+
+
+const PriceLevel*  HotPriceLevel::find ( Price price ) const noexcept {
+
+	if ( !contains( price ) ) return nullptr;
+
+	const PriceLevel* level  =  hot_[ to_idx( price ) ];
+
+	if ( level == nullptr ) return nullptr;
+	if ( level->price != price ) return nullptr;
+
+	return level;
+}
+
+
+void HotPriceLevel::promote ( Price price, PriceLevel* level ) noexcept {
+
+	assert( level != nullptr );
+	assert( contains( price ) );
+	assert( level->price == price );
+
+	const std::size_t idx  =  to_idx( price );
+	PriceLevel* current  =  hot_[ idx ];
+
+	// cant overwrite a live level
+	assert( current == nullptr || current->price == price );
+
+	hot_[ idx ]  =  level;
+
+	update_best_after_add( price );
+}
+
+
+void HotPriceLevel::demote ( Price price ) noexcept {
+
+	if ( !contains( price ) ) return;
+
+	const std::size_t idx  =  to_idx( price );
+
+	PriceLevel* level  =  hot_[ idx ];
+
+	if ( level == nullptr ) return;
+
+	assert( level->price == price );
+
+	hot_[ idx ]  =  nullptr;
+
+	update_best_after_remove( price );
 }
 
