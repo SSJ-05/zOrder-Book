@@ -1,7 +1,7 @@
 // ring price ladder header file// 15.08.26// ZeroK
 /*
  * ownership model
-RingPriceLadder
+HotPriceLevel
     └── hot price index
          └── PriceLevel*
 
@@ -72,16 +72,15 @@ public:
 
 
     // level add/remove from hot_
-    void  promote      	( Order*, PriceLevel* ) noexcept;
-    void  demote	( Order* ) noexcept;
-    // void  clear_level  	( Price )  noexcept;
+    void  promote   ( Price, PriceLevel* ) noexcept;
+    void  demote    ( Price ) 		   noexcept;
 
     // matching ops
     void  update_best_after_add    ( Price ) noexcept;
     void  update_best_after_remove ( Price ) noexcept;
 
     std::size_t  to_idx   ( Price ) const noexcept;
-    bool         contains ( Price ) const noexcept;
+    bool         contains ( Price ) const noexcept;	// ring range
 
     // const PriceLevel&  at_level ( Price ) const noexcept;
     //       PriceLevel&  at_level ( Price )       noexcept;
@@ -94,7 +93,7 @@ public:
 
 
 
-    // iteration interface
+    	// iteration interface
  	template <typename Fn>
 	void for_each_level ( Fn&& fn ) const noexcept {
 
@@ -104,8 +103,7 @@ public:
 
 			if ( level == nullptr ) continue;
 
-			fn ( base_price_ + static_cast<Price>( i ),
-			     *level );
+			fn ( level->price, *level );
 		}
 	}  
 
@@ -114,7 +112,8 @@ public:
     void  center_window ( Price ) noexcept;
     bool  advance_window_up () noexcept;
     bool  advance_window_down () noexcept;
-    bool  in_window ( Price ) const noexcept;
+    bool  in_window ( Price ) const noexcept;	// price in active window
+						// diff from contains()
 
 
     // debug info
