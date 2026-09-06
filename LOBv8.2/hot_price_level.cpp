@@ -68,33 +68,42 @@ void  HotPriceLevel::update_best_after_remove (Price removed_price) noexcept {
      * if removed price was best, hot[best_idx_] is now nullptr
      * */
 
-    if (side_ == Side::Bid) {
+    if ( side_ == Side::Bid ) {
 
-	    for ( auto i {1uz}; i < NUM_LEVELS_; ++i ) {
+	    for ( Price p {removed_price}; p-- > window_low_; ) {
 		
-		    // scan backward from best_idx -1
-		    const std::size_t idx = (best_idx_ - i) & MASK_;
+		    PriceLevel* level  =  find( p );
 
-		    if ( hot_[ idx ] != nullptr ) {
-			    best_idx_  =  idx;
+		    if ( level != nullptr ) {
+			    best_idx_  =  to_idx( p );
+#ifndef NDEBUG
+			    ++window_hits_;
+#endif
 			    return;
 		    }
 	    }
     }
     else {	// ask
 
-	    for ( auto i {1uz}; i < NUM_LEVELS_; ++i ) {
+	    for ( Price p {removed_price +1}; p <= window_high_; ++p ) {
 		
-		    const std::size_t idx = (best_idx_ + i) & MASK_;
-
-		    if ( hot_[ idx ] != nullptr ) {
-			    best_idx_  =  idx;
+		    PriceLevel* level  =  find( p );
+		    
+		    if ( level != nullptr ) {
+			    best_idx_  =  to_idx( p );
+#ifndef NDEBUG
+			    ++window_hits_;
+#endif
 			    return;
 		    }
 	    }
     }
 
-    best_idx_  =  INVALID_;
+    best_idx_  =  INVALID_;	// no levels in hot window
+
+#ifndef NDEBUG
+    ++window_misses_;
+#endif
 }
 
 
