@@ -31,9 +31,6 @@ PriceLevelIndex	(routing layer)
 #include "cold_price_level.hpp"
 #include "price_level_store.hpp"
 
-#include <array>	
-#include <cstdint>
-#include <algorithm>
 #include <cassert>
 
 
@@ -50,9 +47,9 @@ public:
 
 	PriceLevel*  find ( Price price ) noexcept {
 
-		if ( hot_.in_window( price ) )
-			return  hot_.find( price );
-		
+		if ( PriceLevel* level = hot_.find( price ) )
+			return level;
+				
 		return  cold_.find( price );
 	}
 
@@ -63,16 +60,28 @@ public:
 		if ( PriceLevel* level = find( price ) )
 			return level;
 
+		// acquire physical storage
 		PriceLevel* level  =  store_.acquire();
 
 		if ( !level ) return nullptr;
 
-		// put price level in hot or cold strc
-		if ( hot_.in_window( price ) ) 
-			hot_.insert( price, level );
-		else
-			cold_.insert( price, level );
+		// estb level
+		level->price  =  price;
 
+		// put price level in hot or cold strc
+		// acc to hot window pos
+		if ( hot_.in_window( price ) ) { 
+
+			hot_.promote( price, level );
+			return level;
+		}
+
+		// cold insert can fail, since cold is bounded
+		if ( cold_.insert( price, level ) == nullptr ) {
+
+			store_.release( level );
+			return nullptr;
+		}
 
 		return level;
 	}
@@ -80,18 +89,21 @@ public:
 
 	void  release ( Price price ) noexcept {
 
-		PriceLevel* level  =  find( price );
+		// try hot first
+		if ( PriceLevel* level = hot_.find( price ) ) {
 
-		if ( !level ) return;
+			hot_.demote( price );
+			store_.release( level );
+			return;
+		}
 
-		// remove price from whichever level hot or cold
-		if ( hot_.in_window( price ) )
-			hot_.erase( price );
-		else 
+		// then try cold
+		if ( PriceLevel* level = cold_.find( price ) ) {
+
 			cold_.erase( price );
-
-		// return actual price level
-		store_.release( level );
+			store_.release( level );
+			return;
+		}
 	}
 
 	PriceLevel*  best_level () noexcept;
