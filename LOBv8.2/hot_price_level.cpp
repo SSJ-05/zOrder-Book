@@ -21,8 +21,8 @@
 // physical idx = logical & MASK
 std::size_t HotPriceLevel::to_idx (Price p) const noexcept {
         
-    return 
-        static_cast<std::size_t>( p - base_price_ ) & MASK_;
+    return  static_cast<std::size_t>( p - base_price_ ) 
+	    & MASK_;
 }
 
 
@@ -62,21 +62,15 @@ void HotPriceLevel::update_best_after_add (Price new_price) noexcept {
 void  HotPriceLevel::update_best_after_remove (Price removed_price) noexcept {
 
     if ( best_idx_ == INVALID_ ) return;
-    PriceLevel* current_best  =  hot_[ best_idx_ ];
-
     if ( to_idx( removed_price ) != best_idx_ ) return;
 
     /* demote() clears hot_[idx] before calling this
      * if removed price was best, hot[best_idx_] is now nullptr
      * */
 
-    const std::size_t removed_idx  =  to_idx( removed_price );
-    if ( removed_idx != best_idx_ ) return;
-
-
     if (side_ == Side::Bid) {
 
-	    for (auto i {1uz}; i < NUM_LEVELS_; ++i) {
+	    for ( auto i {1uz}; i < NUM_LEVELS_; ++i ) {
 		
 		    // scan backward from best_idx -1
 		    const std::size_t idx = (best_idx_ - i) & MASK_;
@@ -89,7 +83,7 @@ void  HotPriceLevel::update_best_after_remove (Price removed_price) noexcept {
     }
     else {	// ask
 
-	    for (auto i {1uz}; i < NUM_LEVELS_; ++i) {
+	    for ( auto i {1uz}; i < NUM_LEVELS_; ++i ) {
 		
 		    const std::size_t idx = (best_idx_ + i) & MASK_;
 
@@ -152,7 +146,7 @@ const PriceLevel*  HotPriceLevel::find ( Price price ) const noexcept {
 }
 
 
-void HotPriceLevel::promote ( Price price, PriceLevel* level ) noexcept {
+void  HotPriceLevel::promote ( Price price, PriceLevel* level ) noexcept {
 
 	assert( level != nullptr );
 	assert( contains( price ) );
@@ -170,7 +164,7 @@ void HotPriceLevel::promote ( Price price, PriceLevel* level ) noexcept {
 }
 
 
-void HotPriceLevel::demote ( Price price ) noexcept {
+void  HotPriceLevel::demote ( Price price ) noexcept {
 
 	if ( !contains( price ) ) return;
 
@@ -186,4 +180,5 @@ void HotPriceLevel::demote ( Price price ) noexcept {
 
 	update_best_after_remove( price );
 }
+
 

@@ -80,13 +80,14 @@ public:
     void  update_best_after_remove ( Price ) noexcept;
 
     std::size_t  to_idx   ( Price ) const noexcept;
-    bool         contains ( Price ) const noexcept;	// ring range
+    bool         contains ( Price ) const noexcept;	// window range  check
 
     // const PriceLevel&  at_level ( Price ) const noexcept;
     //       PriceLevel&  at_level ( Price )       noexcept;
 
-    const PriceLevel*  best_level()     const noexcept;
-    	  PriceLevel*  best_level()           noexcept;
+    const PriceLevel*  best_level()     const noexcept;	// best level in hot window
+    	  PriceLevel*  best_level()           noexcept; // not in entire orderbook
+							// global best in PriceLevelIndex
 
     const PriceLevel*  find ( Price ) 	const noexcept;
     	  PriceLevel*  find ( Price ) 	      noexcept;
