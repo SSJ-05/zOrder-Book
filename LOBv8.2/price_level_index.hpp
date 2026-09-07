@@ -45,6 +45,7 @@ private:
 
 public:
 
+	[[ nodiscard ]]
 	PriceLevel*  find ( Price price ) noexcept {
 
 		if ( PriceLevel* level = hot_.find( price ) )
@@ -54,6 +55,7 @@ public:
 	}
 
 
+	[[ nodiscard ]]
 	PriceLevel*  acquire ( Price price ) noexcept {
 
 		// check if price exists
@@ -66,7 +68,8 @@ public:
 		if ( !level ) return nullptr;
 
 		// estb level
-		level->price  =  price;
+		level->price  	  =  price;
+		level->total_qty  =  0;
 
 		// put price level in hot or cold strc
 		// acc to hot window pos
@@ -77,22 +80,35 @@ public:
 		}
 
 		// cold insert can fail, since cold is bounded
-		if ( cold_.insert( price, level ) == nullptr ) {
+		PriceLevel* inserted  =  cold_.insert( price, level );
+
+		if ( inserted == nullptr ) {
+
+			assert( level->orders.empty() );
+			assert( level->total_qty == 0 );
 
 			store_.release( level );
 			return nullptr;
 		}
 
-		return level;
+		// if this price becomes global best
+		// slide the hot window 
+
+		return inserted;
 	}
 
 
+	[[ nodiscard ]]
 	void  release ( Price price ) noexcept {
 
 		// try hot first
 		if ( PriceLevel* level = hot_.find( price ) ) {
 
 			hot_.demote( price );
+
+			assert( level->orders.empty() );
+			assert( level->total_qty == 0 );
+
 			store_.release( level );
 			return;
 		}
@@ -101,12 +117,23 @@ public:
 		if ( PriceLevel* level = cold_.find( price ) ) {
 
 			cold_.erase( price );
+
+			assert( level->orders.empty() );
+			assert( level->total_qty == 0 );
+
 			store_.release( level );
 			return;
 		}
 	}
 
-	PriceLevel*  best_level () noexcept;
+
+	// invariant: global best_level will always be promoted to hot window
+	// and hot window slides to accommodate best_level to maintain the invariant
+	[[ nodiscard ]]
+	PriceLevel*  best_level () noexcept { return  hot_.best_level(); }
+
+	[[ nodiscard ]]
+	const PriceLevel*  best_level () const noexcept { return  hot_.best_level(); }
 };
 
 
