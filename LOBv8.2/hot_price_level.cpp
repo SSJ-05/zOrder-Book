@@ -238,3 +238,9 @@ bool  HotPriceLevel::in_window ( Price p ) const noexcept {
 	return p  >=  window_low_
 	    && p  <=  window_high_;	
 }
+
+
+Price  HotPriceLevel::window_low () const noexcept { return window_low_; }
+Price  HotPriceLevel::window_high () const noexcept { return window_high_; }
+Side   HotPriceLevel::side () const noexcept { return side_; }
+

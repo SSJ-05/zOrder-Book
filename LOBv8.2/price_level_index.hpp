@@ -31,6 +31,7 @@ PriceLevelIndex	(routing layer)
 #include "cold_price_level.hpp"
 #include "price_level_store.hpp"
 
+#include <array>
 #include <cassert>
 
 
@@ -41,6 +42,32 @@ private:
 	HotPriceLevel    hot_;
 	ColdPriceLevel   cold_;
 	PriceLevelStore  store_;
+
+
+	// migration func
+	// roles: determine new window
+	// update hot window
+	// migrate levels from hot to cold and vice-versa
+	// preserve invariant: at given time, every level exists in exactly one index
+	// donot touch PriceLevelStore
+	bool  move_window_to ( Price price ) noexcept {
+
+		constexpr Price WINDOW_SIZE { static_cast<Price>( 1 << 11 ) };
+		constexpr Price HALF_WINDOW { WINDOW_SIZE >> 1 };
+		constexpr std::size_t MAX_MOVE { 1uz << 11 };
+
+		/* current 8192 ring is absolute
+		 * if price not present in ring
+		 * this func cant move the window
+		 * ring rebasing is separate operation
+		 * */
+		// target must be in 8192 ring
+		if ( !hot_.contains( price ) ) return false;
+
+
+
+
+	}
 
 
 public:
@@ -123,16 +150,6 @@ public:
 	}
 
 
-	// migration func
-	// roles: determine new window
-	// update hot window
-	// migrate levels from hot to cold and vice-versa
-	// preserve invariant: at given time, every level exists in exactly one index
-	// donot touch PriceLevelStore
-	void  move_window_to ( Price price ) noexcept {
-
-
-	}
 
 	// invariant: global best_level will always be promoted to hot window
 	// and hot window slides to accommodate best_level to maintain the invariant
@@ -141,6 +158,12 @@ public:
 
 	[[ nodiscard ]]
 	const PriceLevel*  best_level () const noexcept { return  hot_.best_level(); }
+
+
+	// accessors for window_high and window_low
+	// Price window_low() const noexcept { return hot_.window_low_; }
+	// Price window_high() const noexcept { return hot_.window_high_; }
+
 };
 
 

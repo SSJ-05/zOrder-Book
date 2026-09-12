@@ -36,12 +36,13 @@ private:
 
 	std::size_t size_  {};
 
-	Side  side_;
+	Side  side_  { Side::Bid };
 
 
 	// custom branchless lower bound for LOB
 	[[ nodiscard ]]
-	static inline
+	__attribute__(( hot ))
+	static
 	std::size_t  BLB ( const ColdEntry* entries, Price price ) noexcept {
 
 		auto pos { 0uz };
@@ -61,11 +62,10 @@ private:
 
 public:
 
-	explicit ColdPriceLevel ( Side side ) noexcept :
-		side_ ( side ) 
+	explicit ColdPriceLevel ( Side side ) noexcept 
+		: side_ ( side ) 
 	{
 		for ( auto& entry : entries_ ) {
-
 			entry.price  =  DUMMY_PRICE_;
 			entry.level  =  nullptr;
 		}
@@ -109,11 +109,12 @@ public:
 
 		// price already exists in cold
 		if ( idx < size_ 
-		    && entries_[ idx ].price == price ) return nullptr;
+		     && entries_[ idx ].price == price ) return nullptr;
 
 		// shift elements to right
-		for ( auto pos {size_}; pos-- > idx; ) 
+		for ( auto pos {size_}; pos-- > idx; ) {
 			entries_[ pos ]  =  entries_[ pos -1 ];
+		}
 
 		// insert
 		entries_[ idx ].price  =  price;
@@ -133,8 +134,10 @@ public:
 		     || entries_[ idx ].price != price ) return;
 		
 		// shift left
-		for ( auto pos {idx}; pos +1 < size_; ++pos )
+		for ( auto pos {idx}; pos +1 < size_; ++pos ) {
+
 			entries_[ pos ]  =  entries_[ pos +1 ];
+		}
 
 		// erase the element
 		entries_[ size_ -1 ]  =  ColdEntry { 

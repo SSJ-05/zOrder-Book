@@ -115,6 +115,11 @@ public:
 						// diff from contains()
 
 
+    // accessors for window_low/high
+    Price  window_low () const noexcept;
+    Price  window_high () const noexcept;
+    Side   side () const noexcept;
+
     // debug info
 #ifndef NDEBUG
     void  print_stats() const noexcept;
