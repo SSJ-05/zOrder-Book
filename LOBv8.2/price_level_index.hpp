@@ -80,21 +80,17 @@ public:
 		}
 
 		// cold insert can fail, since cold is bounded
-		PriceLevel* inserted  =  cold_.insert( price, level );
-
-		if ( inserted == nullptr ) {
-
-			assert( level->orders.empty() );
-			assert( level->total_qty == 0 );
+		if ( cold_.insert( price, level ) == nullptr ) {
 
 			store_.release( level );
 			return nullptr;
 		}
 
+		// To Do:
 		// if this price becomes global best
-		// slide the hot window 
+		// slide the hot window and migrate levels
 
-		return inserted;
+		return level;
 	}
 
 
@@ -126,6 +122,17 @@ public:
 		}
 	}
 
+
+	// migration func
+	// roles: determine new window
+	// update hot window
+	// migrate levels from hot to cold and vice-versa
+	// preserve invariant: at given time, every level exists in exactly one index
+	// donot touch PriceLevelStore
+	void  move_window_to ( Price price ) noexcept {
+
+
+	}
 
 	// invariant: global best_level will always be promoted to hot window
 	// and hot window slides to accommodate best_level to maintain the invariant

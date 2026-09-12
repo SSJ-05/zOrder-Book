@@ -70,7 +70,7 @@ void  HotPriceLevel::update_best_after_remove (Price removed_price) noexcept {
 
     if ( side_ == Side::Bid ) {
 
-	    for ( Price p {removed_price}; p-- > window_low_; ) {
+	    for ( Price p {removed_price -1}; p >= window_low_; --p ) {
 		
 		    PriceLevel* level  =  find( p );
 
@@ -122,7 +122,7 @@ const PriceLevel*  HotPriceLevel::best_level() const noexcept {
 
     if ( best_idx_ == INVALID_ ) return nullptr;
 
-    PriceLevel* level  =  hot_[ best_idx_ ];
+    const PriceLevel* level  =  hot_[ best_idx_ ];
     assert( level != nullptr );
 
     return level;
@@ -191,3 +191,50 @@ void  HotPriceLevel::demote ( Price price ) noexcept {
 }
 
 
+// window sliding ops
+void  HotPriceLevel::center_window ( Price price ) noexcept {
+
+	const Price half  =  static_cast<Price>( WINDOW_SIZE_ >> 1 );
+
+	const Price new_low  =  price - half;
+	const Price new_high =  new_low + static_cast<Price>( WINDOW_SIZE_ - 1 );
+
+	assert( new_low  >= base_price_ );
+	assert( new_high <  base_price_ + static_cast<Price>( NUM_LEVELS_ ) );
+
+	window_low_  =  new_low;
+	window_high_ =  new_high;
+}
+
+
+bool  HotPriceLevel::advance_window_up () noexcept {
+
+	const Price new_high  =  window_high_ + static_cast<Price>( SLIDE_ );
+
+	if ( !contains( new_high ) ) return false;
+
+	window_low_  +=  static_cast<Price>( SLIDE_ );
+	window_high_  =  new_high;
+
+	return true;
+}
+
+
+bool  HotPriceLevel::advance_window_down () noexcept {
+
+	const Price new_low  =  window_low_ - static_cast<Price>( SLIDE_ );
+
+	if ( !contains( new_low ) ) return false;
+
+	window_low_    =  new_low;
+	window_high_  -=  static_cast<Price>( SLIDE_ );
+
+	return true;
+}
+
+
+bool  HotPriceLevel::in_window ( Price p ) const noexcept {
+
+	return p  >=  window_low_
+	    && p  <=  window_high_;	
+}

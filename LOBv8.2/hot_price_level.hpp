@@ -31,9 +31,9 @@ class HotPriceLevel {
 private:
 
     // constants
-    static constexpr std::size_t  NUM_LEVELS_  { 1 << 13 };
-    static constexpr std::size_t  MASK_        { NUM_LEVELS_ - 1 };
-    static constexpr std::size_t  INVALID_     { NUM_LEVELS_ };
+    static constexpr std::size_t  NUM_LEVELS_   { 1 << 13 };
+    static constexpr std::size_t  MASK_         { NUM_LEVELS_ - 1 };
+    static constexpr std::size_t  INVALID_      { NUM_LEVELS_ };
 
 
     // sliding window invariants
@@ -63,7 +63,7 @@ public:
 
 
     // ctor
-    explicit HotPriceLevel (Price base, Side side) 
+    explicit HotPriceLevel (Price base, Side side) noexcept
 	    : 	base_price_ (base),
         	side_ (side),
 		window_low_ (base),
@@ -80,10 +80,8 @@ public:
     void  update_best_after_remove ( Price ) noexcept;
 
     std::size_t  to_idx   ( Price ) const noexcept;
-    bool         contains ( Price ) const noexcept;	// window range  check
+    bool         contains ( Price ) const noexcept;	// price inside 8192 slot ring
 
-    // const PriceLevel&  at_level ( Price ) const noexcept;
-    //       PriceLevel&  at_level ( Price )       noexcept;
 
     const PriceLevel*  best_level()     const noexcept;	// best level in hot window
     	  PriceLevel*  best_level()           noexcept; // not in entire orderbook
@@ -113,7 +111,7 @@ public:
     void  center_window ( Price ) noexcept;
     bool  advance_window_up () noexcept;
     bool  advance_window_down () noexcept;
-    bool  in_window ( Price ) const noexcept;	// price in active window
+    bool  in_window ( Price ) const noexcept;	// price in active 2048 window
 						// diff from contains()
 
 
